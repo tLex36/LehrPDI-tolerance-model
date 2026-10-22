@@ -1,0 +1,72 @@
+{
+ "plan_id": "9d090042fbe2",
+ "run": "2026-10-21 17:52",
+ "variants": {
+  "pathogenic": 602,
+  "benign": 755,
+  "genes": 85
+ },
+ "scores": {
+  "ESM-1v LLR": {
+   "AUROC": 0.6198,
+   "lo": 0.5057,
+   "hi": 0.9154,
+   "within-gene AUROC": 0.7485,
+   "AUROC where ESM is unsure": 0.5446
+  },
+  "tolerance (own residue hidden)": {
+   "AUROC": 0.8285,
+   "lo": 0.747,
+   "hi": 0.8546,
+   "within-gene AUROC": 0.7543,
+   "AUROC where ESM is unsure": 0.8388
+  },
+  "logistic: all features": {
+   "AUROC": 0.8898,
+   "lo": 0.8221,
+   "hi": 0.9746,
+   "within-gene AUROC": 0.9041,
+   "AUROC where ESM is unsure": 0.8791
+  },
+  "logistic: ESM LLR + tolerance": {
+   "AUROC": 0.8263,
+   "lo": 0.7782,
+   "hi": 0.94,
+   "within-gene AUROC": 0.8306,
+   "AUROC where ESM is unsure": 0.8333
+  },
+  "gradient-boosted trees: all features": {
+   "AUROC": 0.8597,
+   "lo": 0.7702,
+   "hi": 0.978,
+   "within-gene AUROC": 0.9311,
+   "AUROC where ESM is unsure": 0.8399
+  }
+ },
+ "questions": {
+  "Q1: primary beats ESM-1v on all variants": {
+   "difference": 0.27,
+   "lo": 0.0477,
+   "hi": 0.4472,
+   "passes": true
+  },
+  "Q2: primary beats ESM-1v within genes": {
+   "difference": 0.1556,
+   "lo": -0.0012,
+   "hi": 0.3207,
+   "passes": false
+  },
+  "Q3: primary beats ESM-1v where ESM is unsure": {
+   "difference": 0.3345,
+   "lo": 0.1815,
+   "hi": 0.474,
+   "passes": true
+  },
+  "Q4: human variant data adds to ESM": {
+   "difference": 0.2065,
+   "lo": 0.0209,
+   "hi": 0.2989,
+   "passes": true
+  }
+ }
+}

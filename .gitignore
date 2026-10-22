@@ -1,0 +1,20 @@
+# large or regenerable data (rebuilt by notebook 05 and the fetch scripts)
+*.parquet
+!figures/results/tolerance_model/final_test/*.parquet
+figures/results/tolerance_model/*_cache/
+figures/results/tolerance_model/poster/conservation_cache/
+figures/results/tolerance_model/probe_reps/
+figures/results/tolerance_model/baselines/
+figures/results/tolerance_model/tolerance_job/
+*.pt
+*.h5ad
+# credentials and licensed data: never commit
+*.json.key
+lehrpdi-*.json
+*hgmd*
+*HGMD*
+# system
+.DS_Store
+__pycache__/
+.ipynb_checkpoints/
+*.log

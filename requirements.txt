@@ -1,0 +1,14 @@
+numpy==1.26.4
+pandas==2.3.3
+scipy==1.15.3
+matplotlib==3.10.9
+scikit-learn==1.6.1
+torch==2.5.1
+fair-esm==2.0.0
+biopython==1.87
+pyarrow==24.0.0
+requests==2.32.3
+lxml==6.1.1
+python-pptx==1.0.2
+py3Dmol==2.5.5
+Pillow==11.1.0

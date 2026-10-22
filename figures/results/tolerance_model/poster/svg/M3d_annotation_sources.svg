@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="990.9pt" height="979.236876pt" viewBox="0 0 990.9 979.236876" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-22T12:37:12.079994</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.9, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 979.236876 
+L 990.9 979.236876 
+L 990.9 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 7.2 77.597218 
+L 983.7 77.597218 
+L 983.7 153.003331 
+L 7.2 153.003331 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #fcf1d6; opacity: 0.55"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 7.2 77.597218 
+L 11.106 77.597218 
+L 11.106 153.003331 
+L 7.2 153.003331 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #eda100"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 7.2 157.014295 
+L 983.7 157.014295 
+L 983.7 217.178747 
+L 7.2 217.178747 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #fcf1d6; opacity: 0.55"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 7.2 157.014295 
+L 11.106 157.014295 
+L 11.106 217.178747 
+L 7.2 217.178747 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #eda100"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 7.2 245.255491 
+L 983.7 245.255491 
+L 983.7 305.419943 
+L 7.2 305.419943 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #dff4ec; opacity: 0.55"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 7.2 245.255491 
+L 11.106 245.255491 
+L 11.106 305.419943 
+L 7.2 305.419943 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #1baf7a"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 7.2 309.430907 
+L 983.7 309.430907 
+L 983.7 384.83702 
+L 7.2 384.83702 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #dff4ec; opacity: 0.55"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 7.2 309.430907 
+L 11.106 309.430907 
+L 11.106 384.83702 
+L 7.2 384.83702 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #1baf7a"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 7.2 412.913765 
+L 983.7 412.913765 
+L 983.7 488.319878 
+L 7.2 488.319878 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #ebe8fa; opacity: 0.55"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 7.2 412.913765 
+L 11.106 412.913765 
+L 11.106 488.319878 
+L 7.2 488.319878 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #6250d6"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 7.2 492.330842 
+L 983.7 492.330842 
+L 983.7 567.736955 
+L 7.2 567.736955 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #ebe8fa; opacity: 0.55"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 7.2 492.330842 
+L 11.106 492.330842 
+L 11.106 567.736955 
+L 7.2 567.736955 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #6250d6"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 7.2 571.747918 
+L 983.7 571.747918 
+L 983.7 647.154032 
+L 7.2 647.154032 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #ebe8fa; opacity: 0.55"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 7.2 571.747918 
+L 11.106 571.747918 
+L 11.106 647.154032 
+L 7.2 647.154032 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #6250d6"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 7.2 651.164995 
+L 983.7 651.164995 
+L 983.7 726.571109 
+L 7.2 726.571109 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #ebe8fa; opacity: 0.55"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 7.2 651.164995 
+L 11.106 651.164995 
+L 11.106 726.571109 
+L 7.2 726.571109 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #6250d6"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 7.2 754.647853 
+L 983.7 754.647853 
+L 983.7 830.053966 
+L 7.2 830.053966 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #f0efec; opacity: 0.55"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 7.2 754.647853 
+L 11.106 754.647853 
+L 11.106 830.053966 
+L 7.2 830.053966 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #8a8984"/>
+   </g>
+   <g id="patch_20">
+    <path d="M 7.2 834.06493 
+L 983.7 834.06493 
+L 983.7 939.954366 
+L 7.2 939.954366 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #f0efec; opacity: 0.55"/>
+   </g>
+   <g id="patch_21">
+    <path d="M 7.2 834.06493 
+L 11.106 834.06493 
+L 11.106 939.954366 
+L 7.2 939.954366 
+z
+" clip-path="url(#p292e2fcda5)" style="fill: #8a8984"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 7.2 50.322666 
+L 983.7 50.322666 
+" clip-path="url(#p292e2fcda5)" style="fill: none; stroke: #52514e; stroke-width: 1.2; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 13.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="13.059" y="42.591422" transform="rotate(-0 13.059 42.591422)">Database</text>
+   </g>
+   <g id="text_2">
+    <text style="font-weight: 700; font-size: 13.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="159.534" y="42.591422" transform="rotate(-0 159.534 42.591422)">What it looks for</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 13.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="423.189" y="42.673687" transform="rotate(-0 423.189 42.673687)">What it means for the protein</text>
+   </g>
+   <g id="text_4">
+    <text style="font-weight: 700; font-size: 13.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="652.6665" y="42.591422" transform="rotate(-0 652.6665 42.591422)">Features in the model</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 13.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="799.1415" y="42.673687" transform="rotate(-0 799.1415 42.673687)">GLRA1 example</text>
+   </g>
+   <g id="text_6">
+    <text style="font-weight: 700; font-size: 13.5px; font-family: 'Arial'; text-anchor: start; fill: #eda100" x="7.2" y="70.668166" transform="rotate(-0 7.2 70.668166)">Structured or not</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="16.965" y="93.764218" transform="rotate(-0 16.965 93.764218)">AIUPred</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 93.552577)">Disorder predicted from the sequence alone</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 106.857108)">(estimated contact energy between residues),</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 120.119452)">and disordered stretches likely to bind a</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 133.381796)">partner</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 93.406327)">Unstructured stretches are flexible:</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 106.528046)">usually tolerant, but they carry short</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 119.973202)">binding motifs and modification sites</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 12px; font-family: 'Arial'; text-anchor: start; fill: #52514e" x="652.6665" y="93.406327" transform="rotate(-0 652.6665 93.406327)">disorder, binding</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 93.406327)">119 residues ≥ 0.5: the</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 106.572577)">N-terminus, the M3–M4 loop and</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 119.694296)">the end of M4</text>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="16.965" y="173.333638" transform="rotate(-0 16.965 173.333638)">MobiDB (disorder)</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 172.969654)">Experimentally confirmed disordered regions</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 186.41481)">(DisProt), and a per-residue conservation</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 199.859967)">score from its sequence alignment</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 172.823404)">Disorder shown by experiment, not only</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 186.085748)">predicted; how conserved each residue</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 199.207467)">is</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 172.823404)">ann_disorder_curated,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 185.945123)">msa_conservation</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 172.823404)">no curated disorder;</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 185.945123)">conservation for all 449</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 199.066842)">residues</text>
+   </g>
+   <g id="text_17">
+    <text style="font-weight: 700; font-size: 13.5px; font-family: 'Arial'; text-anchor: start; fill: #1baf7a" x="7.2" y="238.326439" transform="rotate(-0 7.2 238.326439)">Burial</text>
+   </g>
+   <g id="text_18">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="16.965" y="261.422491" transform="rotate(-0 16.965 261.422491)">PDB, via PDBe</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 261.210851)">Experimental 3D structures (X-ray, cryo-EM,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 274.656007)">NMR) ranked by coverage and resolution;</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 288.101163)">SIFTS maps them to UniProt numbering</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 261.210851)">Burial of each residue, computed on</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 274.515382)">the chain alone: core (RSA &lt; 0.2),</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 287.960538)">boundary, or surface (RSA &gt; 0.4)</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 12px; font-family: 'Arial'; text-anchor: start; fill: #52514e" x="652.6665" y="261.064601" transform="rotate(-0 652.6665 261.064601)">rsa, rsa_class</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 261.210851)">8DN3 chain A (cryo-EM, 3.55</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 276.798194)">Å): 336 residues</text>
+   </g>
+   <g id="text_23">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="16.965" y="325.597907" transform="rotate(-0 16.965 325.597907)">AlphaFold DB</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 325.386266)">A predicted structure for every human</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 338.831422)">protein, with a per-residue confidence score</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 352.135954)">(pLDDT)</text>
+   </g>
+   <g id="text_25">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 325.240016)">Burial where no experimental structure</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 338.544547)">exists; low confidence (pLDDT &lt; 70)</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 351.989704)">usually means unstructured, so RSA is</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 365.252047)">left blank</text>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 12px; font-family: 'Arial'; text-anchor: start; fill: #52514e" x="652.6665" y="325.386266" transform="rotate(-0 652.6665 325.386266)">rsa (fallback), plddt</text>
+   </g>
+   <g id="text_27">
+    <text style="font-size: 12px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="799.1415" y="325.240016" transform="rotate(-0 799.1415 325.240016)">41 residues; 72 left blank</text>
+   </g>
+   <g id="text_28">
+    <text style="font-weight: 700; font-size: 13.5px; font-family: 'Arial'; text-anchor: start; fill: #6250d6" x="7.2" y="405.984713" transform="rotate(-0 7.2 405.984713)">Interaction sites</text>
+   </g>
+   <g id="text_29">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="16.965" y="429.080765" transform="rotate(-0 16.965 429.080765)">PDBe-KB interfaces</text>
+   </g>
+   <g id="text_30">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 428.722874)">Residues that touch another protein chain in</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 441.844593)">any PDB entry, with the partner's identity</text>
+   </g>
+   <g id="text_31">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 428.869124)">Protein–protein contact surfaces: with</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 442.173655)">copies of itself (homo) or with other</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 455.618811)">proteins (hetero)</text>
+   </g>
+   <g id="text_32">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 428.869124)">iface_any, iface_homo,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 442.31428)">iface_hetero</text>
+   </g>
+   <g id="text_33">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 428.722874)">148 residues: other α1</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 442.027405)">subunits and the β subunit</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 455.331936)">(also GFP and GLIC from</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 468.777093)">engineered constructs)</text>
+   </g>
+   <g id="text_34">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="16.965" y="508.497841" transform="rotate(-0 16.965 508.497841)">PDBe-KB ligand sites</text>
+   </g>
+   <g id="text_35">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 508.139951)">Residues that touch small molecules or ions</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 521.444482)">in PDB entries (solvents and crystallisation</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 534.889638)">additives removed)</text>
+   </g>
+   <g id="text_36">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 508.286201)">Pockets for neurotransmitters, drugs</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 521.548545)">and ions; in cryo-EM structures also</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 534.993701)">sugars and lipid fragments</text>
+   </g>
+   <g id="text_37">
+    <text style="font-size: 12px; font-family: 'Arial'; text-anchor: start; fill: #52514e" x="652.6665" y="508.139951" transform="rotate(-0 652.6665 508.139951)">ann_ligand_site</text>
+   </g>
+   <g id="text_38">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 508.139951)">55 residues: the glycine</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 521.585107)">pocket, plus sugar (NAG) and</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 534.847451)">lipid-like contacts on the</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 547.96917)">membrane helices</text>
+   </g>
+   <g id="text_39">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="16.965" y="588.067262" transform="rotate(-0 16.965 588.067262)">MobiDB (LIPs)</text>
+   </g>
+   <g id="text_40">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 587.557028)">Linear interacting peptides: short stretches</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 600.819371)">inside disordered regions that bind a</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 614.264528)">partner (curated, derived from structures,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 627.709684)">or predicted)</text>
+   </g>
+   <g id="text_41">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 587.557028)">Binding sites hidden in unstructured</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 600.819371)">regions</text>
+   </g>
+   <g id="text_42">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 587.557028)">ann_lip,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 600.678746)">ann_lip_predicted</text>
+   </g>
+   <g id="text_43">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 587.557028)">curated LIP 391–398 in the</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 600.723278)">M3–M4 loop; 60 predicted</text>
+   </g>
+   <g id="text_44">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="16.965" y="667.331995" transform="rotate(-0 16.965 667.331995)">ELM</text>
+   </g>
+   <g id="text_45">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 667.120355)">Short linear motifs (3–10 residues)</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 680.382698)">recognised by partner domains: curated</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 693.645042)">instances, plus a scan with ELM's patterns</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 706.949573)">for PDZ-binding C-termini</text>
+   </g>
+   <g id="text_46">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 667.120355)">Docking, targeting and trafficking</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 680.565511)">signals, e.g. C-termini that bind the</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 694.010667)">PDZ domains of PSD-95 at the synapse</text>
+   </g>
+   <g id="text_47">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 667.120355)">ann_motif,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 680.424886)">ann_motif_predicted</text>
+   </g>
+   <g id="text_48">
+    <text style="font-size: 12px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="799.1415" y="666.974105" transform="rotate(-0 799.1415 666.974105)">none in GLRA1</text>
+   </g>
+   <g id="text_49">
+    <text style="font-weight: 700; font-size: 13.5px; font-family: 'Arial'; text-anchor: start; fill: #8a8984" x="7.2" y="747.718801" transform="rotate(-0 7.2 747.718801)">Domains and known sites</text>
+   </g>
+   <g id="text_50">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(16.965 770.814853)">InterPro</text>
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(16.965 784.656162)">(Pfam, SMART, CDD,</text>
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(16.965 798.471103)">PROSITE, PRINTS,</text>
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(16.965 812.312412)">NCBIfam)</text>
+   </g>
+   <g id="text_51">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 770.603212)">Domain and family signatures found with</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 784.048369)">sequence models (hidden Markov models,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 797.493525)">profiles, patterns)</text>
+   </g>
+   <g id="text_52">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 770.603212)">Conserved folded units and signature</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 784.048369)">sites; PANTHER families also group</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 797.493525)">related genes for the train / test</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(423.189 810.755869)">split</text>
+   </g>
+   <g id="text_53">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 770.456962)">ann_domain,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 783.578681)">ann_repeat,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 796.7004)">ann_conserved_site</text>
+   </g>
+   <g id="text_54">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 770.456962)">ligand-binding and</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 783.902119)">transmembrane domains (Pfam);</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 797.347275)">Cys-loop signature 166–180</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 810.801806)">(PROSITE)</text>
+   </g>
+   <g id="text_55">
+    <text style="font-weight: 700; font-size: 12.5px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="16.965" y="850.23193" transform="rotate(-0 16.965 850.23193)">UniProt</text>
+   </g>
+   <g id="text_56">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 850.020289)">Expert-curated features: transmembrane</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 863.32482)">segments, signal peptide, modified residues,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 876.769977)">disulfide bonds, binding and active sites,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(159.534 890.03232)">motifs, coiled coils</text>
+   </g>
+   <g id="text_57">
+    <text style="font-size: 12px; font-family: 'Arial'; text-anchor: start; fill: #0b0b0b" x="423.189" y="849.874039" transform="rotate(-0 423.189 849.874039)">Known structural and functional sites</text>
+   </g>
+   <g id="text_58">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 849.874039)">ann_transmembrane,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 862.995758)">ann_signal, ann_ptm,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 876.440914)">ann_disulfide,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 889.562633)">ann_binding_region,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 902.824977)">ann_active_site,</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #52514e" transform="translate(652.6665 915.946695)">ann_coiled_coil</text>
+   </g>
+   <g id="text_59">
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 849.909664)">M1–M4; signal peptide 1–28;</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 863.35482)">N-glycosylation N66; disulfide</text>
+    <text style="font-size: 12px; font-family: 'Arial'; fill: #0b0b0b" transform="translate(799.1415 876.661695)">cysteines 166, 180, 226, 237</text>
+   </g>
+   <g id="text_60">
+    <text style="font-size: 11.5px; font-family: 'Arial'; fill: #52514e" transform="translate(7.2 957.150126)">UniProt natural variants and mutagenesis results are excluded: they come from disease variants and would leak ClinVar-like information into the features.</text>
+    <text style="font-size: 11.5px; font-family: 'Arial'; fill: #52514e" transform="translate(7.2 969.616485)">n_annotations (how many curated categories mark a residue) is also a feature; buried_sasa (surface buried by a partner, computed from PDB complexes) exists for two showcase genes only.</text>
+   </g>
+   <g id="text_61">
+    <text style="font-weight: 700; font-size: 16px; font-family: 'Arial'; text-anchor: start" x="7.2" y="18.6525" transform="rotate(-0 7.2 18.6525)">Where the structural and annotation features come from</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p292e2fcda5">
+   <rect x="7.2" y="24.6525" width="976.5" height="922.5216"/>
+  </clipPath>
+ </defs>
+</svg>

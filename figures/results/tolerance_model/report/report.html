@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How the tolerance models were built, trained and tested</title>
+<style>
+  @page { size: letter; margin: 0.7in 0.72in 0.75in 0.72in;
+          @bottom-center { content: counter(page); font-family: Arial, Helvetica, sans-serif; font-size: 8.5pt; color: #8a8984; } }
+  @page :first { @bottom-center { content: none; } }
+  :root { --ink: #0b0b0b; --ink2: #52514e; --muted: #8a8984; --rule: #e5e4e0; --blue: #2a78d6; --red: #e34948;
+          --tint-blue: #e3eefb; --tint-red: #fbe6e6; --tint-green: #e2f1e2; --tint-yellow: #fcf1d6; --tint-grey: #f3f2ef; }
+  html, body { background: #ffffff; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 10.3pt; line-height: 1.45; color: var(--ink); margin: 0; }
+  h1 { font-size: 23pt; line-height: 1.15; margin: 0 0 6pt 0; }
+  h2 { font-size: 15pt; margin: 0 0 8pt 0; padding-bottom: 4pt; border-bottom: 1.5pt solid var(--rule); break-before: page; }
+  h3 { font-size: 11.8pt; margin: 14pt 0 5pt 0; break-after: avoid; }
+  h4 { font-size: 10.5pt; margin: 10pt 0 3pt 0; break-after: avoid; }
+  p { margin: 0 0 7pt 0; }
+  ul, ol { margin: 0 0 7pt 0; padding-left: 18pt; }
+  li { margin-bottom: 2.5pt; }
+  .subtitle { font-size: 12.5pt; color: var(--ink2); margin-bottom: 14pt; }
+  .meta { font-size: 9pt; color: var(--muted); margin-bottom: 16pt; }
+  figure { margin: 8pt 0 11pt 0; break-inside: avoid; }
+  figure img { width: 100%; display: block; }
+  figcaption { font-size: 8.8pt; color: var(--ink2); margin-top: 4pt; line-height: 1.38; }
+  figcaption b { color: var(--ink); }
+  .box { border-radius: 5pt; padding: 8pt 11pt; margin: 8pt 0 10pt 0; break-inside: avoid; }
+  .plain { background: var(--tint-green); }
+  .warn { background: var(--tint-yellow); }
+  .key { background: var(--tint-blue); }
+  .grey { background: var(--tint-grey); }
+  .box .label { font-weight: bold; font-size: 9pt; letter-spacing: 0.3pt; text-transform: uppercase; color: var(--ink2); display: block; margin-bottom: 3pt; }
+  table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt 0; font-size: 9pt; break-inside: auto; }
+  th, td { text-align: left; vertical-align: top; padding: 3.5pt 6pt; border-bottom: 0.6pt solid var(--rule); }
+  th { background: var(--tint-grey); font-weight: bold; }
+  tr { break-inside: avoid; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  .group td { background: #faf9f7; font-weight: bold; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 8.6pt; background: #f3f2ef; padding: 0 2pt; border-radius: 2pt; }
+  .small { font-size: 8.8pt; color: var(--ink2); }
+  .toc { columns: 2; column-gap: 24pt; font-size: 9.8pt; margin: 4pt 0 12pt 0; }
+  .toc div { margin-bottom: 3pt; break-inside: avoid; }
+  .qa { margin: 0 0 6pt 0; }
+  .qa b { color: var(--ink); }
+  .nobreak { break-inside: avoid; }
+  .pb { break-before: page; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ COVER + SHORT ANSWERS -->
+<h1>How the tolerance models were built, trained and tested</h1>
+<div class="subtitle">A plain-language guide to notebook <code>05_tolerance_score_modelling</code>, sections 3–16:
+which data went where, what each model learned from, and how accuracy was measured</div>
+<div class="meta">Results as of 21 October 2026 (final test run at 17:52, plan <code>9d090042fbe2</code>). Every number below is taken
+from the notebook's outputs and the saved files in <code>results/tolerance_model/</code>.</div>
+
+<div class="box warn">
+<span class="label">First, the most important point</span>
+Your original goal was a model that <b>predicts the tolerance score</b>, so that the prediction itself becomes the tolerance score.
+That model exists (§11–§13) and was tested on the validation genes in §14. But the model tested on the untouched genes in
+§16 is a different design: it <b>predicts the ClinVar label</b> (pathogenic or benign) of each variant, and the tolerance score is one of
+its <i>inputs</i>. Section 1 explains the two designs side by side. Section 9 lays out three ways to get back to your original goal.
+</div>
+
+<h3>The short answers to your questions</h3>
+<div class="qa"><b>How were RSA and the structural annotations included in the training data?</b>
+They were attached to every residue by a lookup on <i>(gene, residue number)</i> in §7–§8, giving one big table with one row per residue.
+A variant then copies the row of the residue it sits on (section 4, Figure 8). They were inputs to two models: the tree model that
+predicts tolerance (14g), and the variant model (14h, §16). They were deliberately <i>not</i> inputs to the sequence-only networks of your
+original design, which see only the protein sequence.</div>
+<div class="qa"><b>How were ESM's weights and scores used?</b> In three ways (Figure 7). (1) <b>Scores</b>: log-probabilities
+from ESM-1v became four numbers per variant. (2) <b>Representations</b>: ESM-1v's internal description of each residue, 1,280 numbers,
+fed the networks that predict tolerance. (3) <b>Fine-tuned weights</b> (LoRA on ESM-2) are planned for Biowulf but haven't been run.
+ESM's own weights have not been changed in any model trained so far.</div>
+<div class="qa"><b>How were ClinVar clinical significance and gnomAD allele frequency used?</b>
+The ClinVar <b>classification</b> is the <i>answer</i> the variant model learns, and the yardstick for every accuracy number. ClinVar
+variant <b>positions</b> (any classification) feed the ClinVar side of the tolerance score. gnomAD variant <b>positions</b> feed the gnomAD
+side. The gnomAD <b>allele count</b> is used only as a filter (a variant must be seen at least twice). The gnomAD <b>allele frequency</b>
+is <b>not used by any model</b> (Figure 2).</div>
+<div class="qa"><b>What features was the model actually trained on?</b> The final §16 model used 42 numbers per variant in seven
+groups, listed one by one in section 7, plus "was this value missing?" flags. The models of your original design used only the
+sequence: amino-acid tokens, or ESM's 1,280-number representations.</div>
+<div class="qa"><b>Which accuracy metrics improved?</b> For the variant model, the main metric is the <b>AUROC</b>: the chance that a
+random benign variant gets a more benign score than a random pathogenic one. On the untouched test genes it rose from
+<b>0.62 (ESM-1v alone) to 0.89</b>, and where ESM is unsure from <b>0.55 (chance) to 0.88</b>. For the tolerance-predicting models, the metric
+is the <b>within-gene Spearman correlation</b>. It rose from 0.02 (ESM alone) to 0.125 at best, against a maximum possible of 0.39
+(section 9, Figure 29).</div>
+
+<h3>Contents</h3>
+<div class="toc">
+<div>1. Two ways to build a tolerance model</div>
+<div>2. The ingredients, and where each one went</div>
+<div>3. Step 1: turning variants into a tolerance score</div>
+<div>4. Step 2: evidence about each residue (ESM, structure, annotations)</div>
+<div>5. How accuracy is measured</div>
+<div>6. Design A in practice: predicting tolerance</div>
+<div>7. Design B in practice: predicting the ClinVar label</div>
+<div>8. The final test on untouched genes (§16)</div>
+<div>9. What improved, and the way back to your original goal</div>
+<div>10. Glossary</div>
+</div>
+
+<h3>How to read this guide</h3>
+<ul>
+<li><b>§ numbers</b> (§3, §14, …) are section numbers in the notebook; <b>14a–14i</b> and <b>16a–16h</b> are its subsections.</li>
+<li>Sections 1–2 give the big picture. Sections 3–4 explain the data, section 5 the accuracy metrics, sections 6–8 the models and
+their results, and section 9 what it all means. Words in <b>bold</b> are explained where they first appear and again in the glossary.</li>
+<li>Figures marked "from 14f", "from 16g" and so on are copied unchanged from the notebook's outputs. The others were drawn for this
+guide from the same saved results. All figures are high resolution: zoom in on any detail.</li>
+<li>Two designs run through the whole guide. In <b>Design A</b> (your original goal) the model <i>predicts</i> the tolerance score. In
+<b>Design B</b> the model predicts the ClinVar label and is <i>given</i> the tolerance score as evidence. Section 1 explains both.</li>
+<li>Two different collections of genes are used for checking models. The <b>validation genes</b> were used to compare and choose models
+(§14). The <b>test genes</b> were used once, at the end, for the final check (§16). Results on test genes are the most trustworthy.</li>
+</ul>
+
+<h3>The running example</h3>
+<p>Most diagrams use one gene, <b>GLRA1</b> (the α1 subunit of the glycine receptor, 449 residues), and one variant in it,
+<b>p.A300P</b>: alanine 300 replaced by proline, classified as pathogenic in ClinVar. GLRA1 is a training gene, so its data were used to
+fit the models but not to judge them.</p>
+
+<!-- ============================================================ 1 -->
+<h2>1. Two ways to build a tolerance model</h2>
+<p>A <b>machine-learning model</b> is a formula with adjustable numbers (its <b>weights</b>). It is given <b>inputs</b> (also called
+<b>features</b>: everything it is allowed to look at) and produces an <b>output</b>. While it <b>trains</b>, its output is compared with
+the correct answer (the <b>target</b>), and the weights are adjusted to make the two agree better. After training, the model is
+tested on data it has never seen. The choice of target decides what the model becomes.</p>
+
+<figure><img src="figs/f01_two_designs.png">
+<figcaption><b>Figure 1. The two designs in this notebook.</b> In Design A (your original goal) the tolerance score is the
+<i>target</i>: the model learns to predict it from the protein sequence. In Design B, the ClinVar label is the target, and the observed
+tolerance score is one of 42 <i>inputs</i>.</figcaption></figure>
+
+<h3>Design A: predict tolerance (the original goal)</h3>
+<p>The observed tolerance score (section 3) can only be computed where human variants have been seen, and it is noisy. A model that
+predicts it from the protein sequence alone could give a tolerance value for <i>every</i> residue of <i>any</i> protein, smoothing out
+the noise. §11 turned every protein into model input, §12 built the model (ESM-2 with a small "head" network), and §13 tested the
+code on this laptop. §14 then asked whether the target can be learned at all.</p>
+
+<h3>Design B: predict the clinical label (what §16 tested)</h3>
+<p>Your underlying hypothesis is that human population data mark constraint that evolution (ESM) misses. The most direct test of that
+hypothesis is at the level of single variants: put the human-variant evidence and the evolutionary evidence side by side, and see
+whether together they separate known pathogenic from known benign variants better than ESM alone.</p>
+
+<h3>Why the notebook moved from A to B in §14</h3>
+<ul>
+<li><b>The tolerance target is mostly noise at the level of single residues.</b> Built twice from two random halves of the variants, the
+two versions barely agree. Even a perfect model could reach a correlation of only about <b>0.39</b> with it (section 3).</li>
+<li><b>The best Design A model reached 0.125</b>, about a third of that ceiling (section 6).</li>
+<li><b>As a way to classify variants, predicted tolerance did worse than ESM alone</b> (AUROC 0.50–0.79 vs 0.94 on the validation genes),
+because one tolerance value per residue can't tell a mild swap from a drastic one at the same position.</li>
+<li><b>Design B worked well</b>: combining tolerance with ESM lifted the AUROC well above ESM alone (section 7). So 14i recommended making it
+the main product, and §16 tested it.</li>
+</ul>
+
+<div class="box plain"><span class="label">In plain words</span>
+Your original model predicts <i>how tolerant each residue is</i>. The tested model predicts <i>whether a specific variant is benign</i>,
+and uses the tolerance score as one of its clues. Design A has been built and tried, but not tested on the untouched genes, and its
+GPU fine-tuning hasn't been run. Section 9 shows how the two designs can be reconciled.</div>
+
+<!-- ============================================================ 2 -->
+<h2>2. The ingredients, and where each one went</h2>
+<p>Everything in the notebook is built from the 1,082 postsynaptic SynGO genes, using one reference protein sequence per gene
+(the MANE transcript). The table lists every data source; Figure 2 shows which model used which.</p>
+
+<table>
+<tr><th>Source</th><th>What it is</th><th>What was taken from it</th></tr>
+<tr><td><b>gnomAD v4</b></td><td>genetic variants in about 800,000 people, with those known to have severe childhood disease excluded (a "healthy" reference population)</td>
+<td>1,081,180 missense variants in these genes; <b>432,831 used</b>: those seen in at least 2 people, with an extra rule for X-linked genes (section 3)</td></tr>
+<tr><td><b>ClinVar</b></td><td>variants reported by clinical laboratories, each with a classification (pathogenic, benign, uncertain = VUS) and a review status (stars)</td>
+<td>206,892 missense variants (any classification) for the tolerance score. As answers for Design B: <b>15,339</b> pathogenic / likely pathogenic or
+benign / likely benign variants with ≥ 1 star in the training and validation genes, and <b>1,357</b> in the test genes</td></tr>
+<tr><td><b>AIUPred</b></td><td>a predictor of intrinsically disordered (floppy, unstructured) regions</td>
+<td>a disorder score and a binding-region score for every residue</td></tr>
+<tr><td><b>ESM-1v</b></td><td>a protein language model with 650 million weights, trained on natural protein sequences</td>
+<td>log-probabilities for all 20 amino acids at every residue (§4); internal representations (14c)</td></tr>
+<tr><td><b>Structures</b></td><td>experimental structures (PDB) and AlphaFold predictions</td>
+<td>solvent accessibility (RSA) for 61% of residues, AlphaFold confidence (pLDDT), binding interfaces from PDBe-KB (§7)</td></tr>
+<tr><td><b>Annotations</b></td><td>InterPro, UniProt, MobiDB, ELM, PDBe-KB</td>
+<td>domains, motifs, PTMs, binding and ligand sites, transmembrane segments, curated disorder, conservation (§8)</td></tr>
+</table>
+
+<figure><img src="figs/f02_data_use_map.png">
+<figcaption><b>Figure 2. Where each piece of data was used.</b> Columns are the places data can go: building the tolerance score,
+the models of Design A, the variant model of Design B, and the labels that accuracy is measured against. A dash means "not used there".
+Two things stand out: the ClinVar <i>classification</i> is used only as the answer (never as an input), and the gnomAD allele
+<i>frequency</i> is not used anywhere.</figcaption></figure>
+
+<div class="box key"><span class="label">Allele frequency: not used, and safer that way</span>
+Allele frequency was added to the variant table (a side request) but was never chosen as a model input. That turns out to be the safer
+choice. ClinVar often classifies a variant as benign <i>because</i> it is common in gnomAD, so giving the model a variant's own allele
+frequency would partly hand it the answer, and a high score would be circular. The variant model instead uses gnomAD variants
+<i>near</i> the variant, with the variant's own residue hidden (section 7).</div>
+
+<!-- ============================================================ 3 -->
+<h2>3. Step 1: turning variants into a tolerance score (§3)</h2>
+<p>The idea: positions where healthy people carry many missense variants are probably <b>tolerant</b> of change, and positions where
+disease reports cluster are probably <b>intolerant</b>. Figure 3 builds the score for one gene, GLRA1 (a glycine-receptor subunit),
+which is used as the running example throughout this guide.</p>
+
+<figure><img src="figs/f03_tolerance_build.png">
+<figcaption><b>Figure 3. Building the tolerance score for GLRA1.</b> Step 1: every gnomAD variant (up) and ClinVar variant (down) at its
+residue. Step 2: each set is turned into a smooth density. Step 3: tolerance = scaled gnomAD density − scaled ClinVar density. Red
+regions have more disease reports than healthy variation. Residue 300, where the pathogenic variant p.A300P sits, is in a deep
+intolerant region.</figcaption></figure>
+
+<h3>The steps in detail</h3>
+<ol>
+<li><b>Choose which variants count.</b> gnomAD variants seen in at least 2 people (a variant seen once may be a sequencing error or one
+person's private variant). On the X and Y chromosomes, a gnomAD variant counts only if a man (with a single X) or a homozygous woman
+carries it. A variant seen only in women with a second, normal X could be a hidden recessive disease variant. All ClinVar
+missense variants count, <i>whatever their classification</i>.</li>
+<li><b>Weight each variant by how drastic it is</b> (Figure 4, right). Swapping alanine for serine is mild; tryptophan for cysteine is
+drastic. In ordered regions the BLOSUM62 table supplies this weight, in disordered regions the Grantham distance. If several
+variants sit at one residue, the most drastic one counts.</li>
+<li><b>Spread each variant over its neighbours</b> (Figure 4, left). Nearby residues usually share a fate, so each weight is spread with a
+bell-shaped curve: wide (±31 residues) in ordered regions, narrow (±5) in disordered ones, where neighbours matter less. AIUPred's
+disorder score decides which applies.</li>
+<li><b>Subtract.</b> Each smoothed density is scaled to run from 0 to 1 within the gene, then tolerance = gnomAD − ClinVar, so it runs from
+−1 to +1.</li>
+<li><b>Centre.</b> Each gene's median is subtracted. This removes differences in overall level between genes (some genes simply have more
+ClinVar submissions), so the target describes which parts of a protein are more or less tolerant <i>than the rest of that protein</i>.
+This centred value, <code>tolerance_v4_centered</code>, is the target of Design A.</li>
+</ol>
+
+<figure><img src="figs/f03b_kernel.png">
+<figcaption><b>Figure 4. The two ingredients of the smoothing.</b> Left: how far one variant's weight spreads. Right: how much one
+variant counts. BLOSUM62 weights differ little between swaps (0.67–0.87 here), so in ordered regions nearly every variant counts about the
+same. Grantham distances vary more. Grantham rates A→P as mild, even though a proline can break a helix: these tables measure chemistry,
+not structure.</figcaption></figure>
+
+<h3>How reliable is the tolerance score? The noise ceiling (14a)</h3>
+<p>To see how much of the score is signal and how much is chance, the variants were split randomly into two halves, and the score was
+built twice, once from each half. If the score were pure signal, the two versions would be nearly identical.</p>
+<figure><img src="figs/nb_169.png">
+<figcaption><b>Figure 5. Two halves of the variants give two quite different tracks</b> (from 14a). Left: the agreement (Spearman
+correlation) between the two half-tracks within each gene; the median is 0.08. Right: a typical gene.</figcaption></figure>
+<p>From that agreement, the reliability of the full score is about 0.15, and the <b>noise ceiling</b> is √0.15 ≈ <b>0.39</b>: no model,
+however good, could correlate more than about 0.39 with this target, because the target itself is mostly noise at single-residue
+resolution. That is the yardstick for Design A (section 6). 14g later found a recipe with a much higher ceiling (0.61): building the
+ClinVar side from pathogenic variants only (section 6).</p>
+
+<!-- ============================================================ 4 -->
+<h2>4. Step 2: evidence about each residue (§4, §7, §8)</h2>
+
+<h3>ESM: what evolution says about each position</h3>
+<p><b>ESM</b> is a protein language model. It was trained on tens of millions of natural protein sequences to fill in hidden amino
+acids, and in doing so learned which amino acids fit where. For each residue it gives a probability for every one of the 20 amino acids.
+Positions where evolution tolerates almost no change get a narrow, confident distribution; tolerant positions get a spread-out one.</p>
+
+<figure><img src="figs/f04_esm_scores.png">
+<figcaption><b>Figure 6. ESM-1v's view of 40 residues of GLRA1.</b> Each column is a residue and each row an amino acid; darker means more
+likely. ESM-1v is shown the real sequence (the "wild-type marginal" method), so the amino acid that is there gets a probability close to 1.
+What carries information is how unlikely each <i>alternative</i> is. Bottom: the four ESM numbers used later. The <b>LLR</b> (log-likelihood
+ratio) of a substitution compares the new amino acid with the original: −12.6 for p.A300P means proline is far less likely than alanine
+here.</figcaption></figure>
+
+<p>The four ESM numbers, all computed once in §4 and cached:</p>
+<table>
+<tr><th>Name</th><th>Per</th><th>Meaning</th></tr>
+<tr><td><code>esm_llr</code></td><td>variant</td><td>log P(new amino acid) − log P(original). Negative = the swap is unexpected; the more negative, the worse</td></tr>
+<tr><td><code>esm_wt_lp</code></td><td>residue</td><td>log-probability of the amino acid that is there</td></tr>
+<tr><td><code>esm_entropy</code></td><td>residue</td><td>how spread out ESM's probabilities are (low = a tightly constrained position)</td></tr>
+<tr><td><code>esm_mean_llr</code></td><td>residue</td><td>the average LLR of all 19 possible swaps at this residue (one number per residue)</td></tr>
+</table>
+
+<h3>The three ways ESM was used</h3>
+<figure><img src="figs/f05_esm_three_ways.png">
+<figcaption><b>Figure 7. ESM's scores, representations and weights.</b> Scores and representations come from ESM-1v with its weights
+frozen. Fine-tuning the weights themselves (way 3) was the plan for the Biowulf run of Design A.</figcaption></figure>
+<p>A <b>representation</b> is ESM's internal description of a residue: a list of 1,280 numbers that summarises what ESM has inferred
+about that residue from the whole protein around it. It is far richer than the four scores, but it isn't readable directly. It
+becomes useful only when another model learns how to translate it into the quantity you care about, here tolerance.</p>
+
+<h3>Structure, annotations and disorder</h3>
+<ul>
+<li><b>RSA (relative solvent accessibility)</b>: the share of a residue's surface exposed to water, from 0 (buried in the core) to 1
+(fully exposed). It was computed from the best experimental chain where one exists (PDB), otherwise from the AlphaFold model, and left
+empty where AlphaFold's confidence (<b>pLDDT</b>) is below 70. Available for 61% of residues; the rest are mostly disordered.</li>
+<li><b>Interfaces</b>: whether the residue touches another chain in any experimental structure (from PDBe-KB): a copy of itself
+(<code>iface_homo</code>), a different protein (<code>iface_hetero</code>), or either (<code>iface_any</code>).</li>
+<li><b>Annotations</b>: yes/no flags for domains, repeats, motifs, binding regions, linear interacting peptides, PTM sites, disulfides,
+ligand and active sites, conserved sites, coiled coils, transmembrane segments and signal peptides, plus a count of how many apply.</li>
+<li><b>Disorder</b>: AIUPred's disorder and binding scores, and MobiDB's curated disorder. <b>Conservation</b>: MobiDB's PSI-BLAST
+conservation score, available for 53% of residues.</li>
+</ul>
+
+<h3>How it all comes together: one row per residue, one row per variant</h3>
+<p>Every source uses its own numbering (UniProt, PDB, AlphaFold), so §7 and §8 first translate everything onto the MANE sequence's
+numbering. Then every value is a column in one table, <code>residue_df</code>, with one row per residue: 780,750 rows in all. A
+variant needs only a lookup: <i>which gene, which residue?</i> This is how RSA and the annotations "entered the training data".</p>
+<figure><img src="figs/f06_residue_to_variant.png">
+<figcaption><b>Figure 8. From residue rows to a variant row.</b> Top: seven rows of <code>residue_df</code> around GLRA1 residue 300, with
+columns coloured by source. Bottom: a variant's row is the row of its residue, plus what depends on the exact swap, plus the human-variant
+features recomputed with the variant's own residue hidden (section 7).</figcaption></figure>
+
+<!-- ============================================================ 5 -->
+<h2>5. How accuracy is measured</h2>
+
+<h3>Data the model has never seen</h3>
+<p>A model can look perfect on the data it learned from simply by memorising it (<b>overfitting</b>). Accuracy therefore always has to be
+measured on data kept aside. §10 split the genes three ways, keeping families of related genes (<b>clusters</b>: similar sequences or the
+same PANTHER family) together, so a test gene never has a close relative in training:</p>
+<table>
+<tr><th>Split</th><th class="num">Proteins</th><th class="num">Residues</th><th>Used for</th></tr>
+<tr><td>Training</td><td class="num">854</td><td class="num">618,540</td><td>learning the weights</td></tr>
+<tr><td>Validation</td><td class="num">107</td><td class="num">79,309</td><td>comparing models and choosing settings (§14)</td></tr>
+<tr><td>Test</td><td class="num">107</td><td class="num">78,366</td><td>one final, untouched check (§16)</td></tr>
+</table>
+<p>Within the training genes, <b>cross-validation</b> gives every variant an honest score: the data are cut into 5 parts by cluster, the
+model is fitted on 4 parts and scores the 5th, and this repeats until every part has been scored (Figure 14, right).</p>
+
+<h3>For Design A: within-gene Spearman correlation</h3>
+<p>Design A predicts a whole track per protein. The question is whether the predicted track rises and falls where the real one does.
+The <b>Spearman correlation</b> compares the <i>ranks</i>: +1 means the residues are in exactly the same order, 0 means no relation, −1
+means reversed. It is computed within each gene, and the median over the validation genes is reported. The noise ceiling (0.39) is the
+best possible score.</p>
+<figure><img src="figs/f08_spearman.png">
+<figcaption><b>Figure 9. Spearman correlation, with made-up data.</b> Prediction A follows the target's ups and downs (0.81) even though its
+values are smaller; prediction B doesn't (−0.22). Only the ranks matter.</figcaption></figure>
+
+<h3>For Design B: the AUROC</h3>
+<p>Design B gives each variant a score. Take every pair of one truly benign and one truly pathogenic variant, and count how often the
+benign one gets the more benign score. That share is the <b>AUROC</b> (area under the ROC curve). 0.5 is coin-flipping; 1.0 is perfect.
+It doesn't depend on choosing a cut-off, and it is the same as the area under the curve traced out by sliding a cut-off from one end of
+the scores to the other.</p>
+<figure><img src="figs/f09_auroc.png">
+<figcaption><b>Figure 10. The AUROC, with 12 made-up variants.</b> 31 of the 36 benign–pathogenic pairs are in the right order, so
+AUROC = 31/36 = 0.86. Right: the ROC curve; its area is the same 0.86.</figcaption></figure>
+
+<h3>Three versions of the AUROC</h3>
+<ul>
+<li><b>All variants</b>: the standard number, pooled over genes.</li>
+<li><b>Within genes</b>: the average AUROC <i>inside</i> each gene with at least 3 pathogenic and 3 benign variants. This is the
+clinical question: in a gene we know, is <i>this</i> variant worse than <i>that</i> one? Pooling can hide or exaggerate differences
+(Figure 11), so both are reported.</li>
+<li><b>Where ESM is unsure</b>: only the variants ESM-1v calls mild (its LLR is above the median for benign training variants). This is
+where human data were expected to help most.</li>
+</ul>
+<figure><img src="figs/f10_pooled_vs_within.png">
+<figcaption><b>Figure 11. Why pooled and within-gene AUROC can disagree.</b> Within each gene the score separates the classes
+perfectly, but gene 2's whole scale is shifted, so pooled across genes the AUROC drops to 0.81. This happened to ESM-1v on the test
+genes (section 8).</figcaption></figure>
+
+<h3>How sure are we? Bootstrap ranges</h3>
+<p>The test genes are just one sample of genes; a different sample would give somewhat different numbers. The <b>bootstrap</b> estimates
+how much: draw the test genes again at random, with replacement, 1,000 times, recompute the score each time, and keep the middle 95% of
+the results as the <b>95% range</b>. Whole genes are resampled, because variants in the same gene aren't independent. To compare two
+models, the <i>difference</i> is recomputed on each resample (a <b>paired</b> bootstrap). A comparison "passes" when the whole range is
+above 0.</p>
+<figure><img src="figs/f11_bootstrap.png">
+<figcaption><b>Figure 12. The bootstrap for one real result</b> (§16, question Q3). The model's gain over ESM-1v, where ESM is unsure, was
++0.335. Across 1,000 resamples of the test genes it stayed between +0.18 and +0.47, nowhere near 0, so the gain isn't a fluke of which
+genes landed in the test set.</figcaption></figure>
+
+<h3>Decisions and honest probabilities</h3>
+<p>The AUROC measures <i>ranking</i>. To make a call, a cut-off is needed: for example, call a variant benign when P(benign) ≥ 0.5. Then the
+useful numbers are the share of pathogenic variants caught, the share of benign variants correctly cleared, and the overall
+<b>accuracy</b>. <b>Calibration</b> asks whether a stated probability can be taken at face value: of the variants given P(benign) ≈ 0.8,
+are about 80% really benign? The <b>Brier score</b> (mean squared error of the probabilities; 0 is perfect) summarises it. Both are shown
+in section 8.</p>
+
+<!-- ============================================================ 6 -->
+<h2>6. Design A in practice: predicting tolerance (14c, 14f, 14g)</h2>
+<p>Every Design A model gets the same target (the centred tolerance of each residue in the training genes) and is scored on the
+validation genes by within-gene Spearman correlation. They differ in what they see.</p>
+
+<table>
+<tr><th>Model</th><th>Input (features)</th><th>How it learns</th><th>Section</th></tr>
+<tr><td>Linear probe</td><td>ESM-1v's 1,280-number representation of each residue, ESM frozen</td><td>a weighted sum of the 1,280 numbers (ridge regression)</td><td>14c</td></tr>
+<tr><td>From-scratch networks: window MLP, dilated CNN, BiLSTM</td><td>the amino-acid sequence only (tokens), up to 512 residues at a time</td><td>neural networks trained from random starting weights</td><td>14f</td></tr>
+<tr><td>ESM heads: MLP, CNN, BiLSTM</td><td>ESM-1v representations, ESM frozen</td><td>small networks on top of ESM</td><td>14f</td></tr>
+<tr><td>Gradient-boosted trees</td><td>97 numbers per residue: 64 ESM summaries, ESM scores, amino acid, disorder, conservation, structure, annotations, position</td><td>hundreds of small decision trees</td><td>14g</td></tr>
+<tr><td>ESM-2 + LoRA (planned)</td><td>the sequence, through ESM-2 with trainable add-ons</td><td>fine-tuning on a GPU</td><td>§12, §15</td></tr>
+</table>
+
+<figure><img src="figs/nb_180.png">
+<figcaption><b>Figure 13. What each network can see when it predicts one residue (red)</b> (from 14f). Dark: what it reads directly. Light:
+context that reaches it only through ESM, which read the whole protein. The right-hand column is the number of weights learned from our
+data.</figcaption></figure>
+
+<h3>How the networks were trained</h3>
+<figure><img src="figs/f07_training_ideas.png">
+<figcaption><b>Figure 14. Training and cross-validation.</b> Left: the loop every model repeats. Right: cross-validation by cluster,
+used in 14h.</figcaption></figure>
+<ul>
+<li><b>Loss</b>: the Huber loss, a measure of how far the predicted track is from the target that is forgiving of the occasional large
+miss. Padding (empty space after short proteins) never counts.</li>
+<li><b>Epochs</b>: each training protein contributes one random window of up to 512 residues per pass; 16 windows are processed at a time.</li>
+<li><b>Early stopping</b>: 10% of the training clusters are set aside. After every epoch the model predicts them, and training stops
+when that score stops improving, keeping the best epoch. That is the point where the model starts to memorise rather than learn
+(<b>overfitting</b>).</li>
+<li><b>Seeds</b>: each network was trained 3 times from different random starting weights, because small networks vary from run to run.</li>
+</ul>
+<figure><img src="figs/nb_182.png">
+<figcaption><b>Figure 15. Early stopping in practice</b> (from 14f). Each line is one model's score on the set-aside proteins after each
+epoch; the dot marks the epoch that was kept. Most models peak within a few epochs, a sign of how little learnable signal the target
+holds.</figcaption></figure>
+
+<h3>Results</h3>
+<figure><img src="figs/nb_184.png">
+<figcaption><b>Figure 16. Design A results on the validation genes</b> (from 14f). Left: within-gene Spearman with the target, against the
+noise ceiling (red dashes). Right: the predicted tolerance used to separate benign from pathogenic variants, against ESM-1v's own LLR
+(dashed line). Small dots are individual training runs; bars are 95% bootstrap ranges.</figcaption></figure>
+<ul>
+<li><b>ESM's pre-training matters</b>: networks trained from scratch on ~850 proteins reached 0.03–0.05; the same networks on frozen ESM
+reached 0.09–0.125.</li>
+<li><b>Context helps a little</b>: the BiLSTM, which reads the whole window in both directions, was the best of each group.</li>
+<li><b>The best model reached 0.125, a third of the 0.39 ceiling.</b></li>
+<li><b>Predicted tolerance is a weak variant classifier</b> (AUROC 0.50–0.79), well below ESM-1v's LLR (0.94): one value per residue can't
+distinguish a mild swap from a drastic one at the same position.</li>
+</ul>
+
+<h3>Adding structure and annotations to predict tolerance (14g, part 1)</h3>
+<p>This is where RSA, interfaces and annotations were tried as inputs to Design A. A tree model got all 97 per-residue numbers, and each
+group was tested alone and removed in turn.</p>
+<figure><img src="figs/nb_188.png">
+<figcaption><b>Figure 17. Which inputs help predict tolerance</b> (from 14g). Left: each group alone. Right: the change when a group is
+removed from all the others, with 95% ranges. Only disorder is a real loss (red); every other change is within the noise.</figcaption></figure>
+<p>All groups together reached 0.126, essentially the same as the best ESM head. Structure and annotations add nothing reliable to this
+target. One likely reason is that the target is so noisy that small, real effects disappear.</p>
+
+<h3>A better target (14g, part 2)</h3>
+<figure><img src="figs/nb_190.png">
+<figcaption><b>Figure 18. Changing the recipe of the target</b> (from 14g). Left: how reproducible each recipe is (noise ceiling). Middle:
+the linear probe against its own target. Right: the common yardstick, the AUROC on held-out ClinVar variants.</figcaption></figure>
+<p>Building the ClinVar side from <b>pathogenic variants only</b> (instead of every ClinVar entry, VUS and benign included) raised the
+ceiling from 0.37 to <b>0.61</b>, the probe from 0.10 to <b>0.32</b>, and the held-out AUROC of the track itself from 0.79 to <b>0.84</b>.
+Keeping gnomAD variants seen only once made the target more reproducible but less useful. This is the most promising lead for your
+original design (section 9).</p>
+
+<!-- ============================================================ 7 -->
+<h2>7. Design B in practice: predicting the ClinVar label (14b, 14h)</h2>
+
+<h3>The motivating result (14b)</h3>
+<figure><img src="figs/nb_171.png">
+<figcaption><b>Figure 19. Human data and evolution are complementary</b> (from 14b, on 2,477 held-out labelled variants). Left: tolerance
+alone (AUROC 0.847) and ESM-1v alone (0.881) both separate pathogenic from benign; combined, 0.927. Right: among pathogenic variants that ESM
+calls mild (bottom right), 80% sit in human-intolerant regions (tolerance below 0), against 42% of the benign ones.</figcaption></figure>
+
+<h3>The data and the answer</h3>
+<p>One row per labelled ClinVar variant: pathogenic / likely pathogenic versus benign / likely benign, with at least one review star.
+Conflicting and uncertain classifications were left out. The training and validation genes hold 15,339 such variants (5,449 pathogenic,
+9,890 benign) in 716 genes; the test genes hold 1,357.</p>
+
+<h3>The 42 features the final model was trained on</h3>
+<table>
+<tr><th style="width:24%">Feature</th><th>What it measures</th></tr>
+<tr class="group"><td colspan="2">ESM scores (4) — evolution, from ESM-1v (§4)</td></tr>
+<tr><td><code>esm_llr</code></td><td>how unexpected this exact swap is: log P(new) − log P(original)</td></tr>
+<tr><td><code>esm_wt_lp</code>, <code>esm_entropy</code>, <code>esm_mean_llr</code></td><td>how constrained the residue is: the original amino acid's log-probability, the spread of ESM's guesses, the average LLR of all 19 swaps</td></tr>
+<tr class="group"><td colspan="2">Human variants nearby (7) — from gnomAD and ClinVar, with the variant's own residue hidden</td></tr>
+<tr><td><code>tolerance</code></td><td>the §3 tolerance score at this residue</td></tr>
+<tr><td><code>gnomad_density</code>, <code>clinvar_density</code></td><td>the two smoothed densities that make up the tolerance score</td></tr>
+<tr><td><code>gnomad_within_5</code>, <code>gnomad_within_15</code></td><td>number of gnomAD variants within ±5 and ±15 residues</td></tr>
+<tr><td><code>clinvar_within_5</code>, <code>clinvar_within_15</code></td><td>number of ClinVar variants (any classification) within ±5 and ±15 residues</td></tr>
+<tr class="group"><td colspan="2">Gene-wide variant rates (2)</td></tr>
+<tr><td><code>gnomad_per_residue</code>, <code>clinvar_per_residue</code></td><td>gnomAD and ClinVar variants per residue across the whole gene</td></tr>
+<tr class="group"><td colspan="2">Substitution type (3) — the chemistry of the swap</td></tr>
+<tr><td><code>blosum62</code>, <code>grantham</code></td><td>how different the two amino acids are (each scaled 0 to 1)</td></tr>
+<tr><td><code>hydrophobicity_change</code></td><td>Kyte–Doolittle hydrophobicity of the new amino acid minus the original</td></tr>
+<tr class="group"><td colspan="2">Structure (6) — from §7</td></tr>
+<tr><td><code>rsa</code>, <code>plddt</code></td><td>how exposed the residue is; AlphaFold's confidence</td></tr>
+<tr><td><code>buried_sasa</code></td><td>surface buried by partner molecules; computed for only a few showcase genes, so almost always empty</td></tr>
+<tr><td><code>iface_any</code>, <code>iface_homo</code>, <code>iface_hetero</code></td><td>whether the residue touches another chain (any, a copy of itself, a different protein)</td></tr>
+<tr class="group"><td colspan="2">Annotations (16) — from §8</td></tr>
+<tr><td><code>ann_*</code> (15 flags), <code>n_annotations</code></td><td>yes/no for domain, repeat, motif (curated, predicted), binding region, linear interacting peptide (curated, predicted), PTM, disulfide, ligand site, active site, conserved site, coiled coil, transmembrane, signal peptide; and how many apply</td></tr>
+<tr class="group"><td colspan="2">Disorder and conservation (4) — AIUPred and MobiDB</td></tr>
+<tr><td><code>disorder</code>, <code>binding</code></td><td>AIUPred disorder score; AIUPred binding-region score</td></tr>
+<tr><td><code>ann_disorder_curated</code>, <code>msa_conservation</code></td><td>curated disorder (yes/no); conservation across related sequences</td></tr>
+</table>
+<p class="small">Missing values (for example, no structure for a residue) are filled with the feature's median, and a "was it missing?"
+flag is added so the model can learn whether missingness matters. Every feature is then standardised (shifted and scaled to mean 0,
+spread 1), so the weights are comparable.</p>
+
+<h3>Hiding each variant's own residue</h3>
+<p>If a variant's own position fed its human-variant features, a pathogenic variant would partly vouch for itself, and so would a second
+pathogenic substitution at the same residue. So the residues with labelled variants are dealt into 5 groups, and the features of a variant
+in group <i>k</i> come from tracks rebuilt <i>without any variant at group-k residues</i>.</p>
+<figure><img src="figs/nb_192.png">
+<figcaption><b>Figure 20. The evidence one variant is scored from</b> (from 14h). The variant's own residue is hidden; the shaded windows
+show the ±5 and ±15 residues counted.</figcaption></figure>
+
+<h3>The model: logistic regression</h3>
+<figure><img src="figs/nb_233.png">
+<figcaption><b>Figure 21. Logistic regression in three steps</b> (from 16g). Each standardised feature is multiplied by its weight, the
+products are added up into one number <i>z</i>, and an S-shaped curve turns <i>z</i> into a probability of being benign. Right: the
+1,357 test variants on that curve.</figcaption></figure>
+<p>Training means choosing the 42 weights (plus those for the missing-value flags) that make the training labels as likely as possible,
+with a small penalty on very large weights. It takes a fraction of a second. Gradient-boosted trees, a small neural network (MLP) and two
+networks that read raw variant positions (window CNN and BiLSTM) were also tried in 14h, all with the same cross-validation by cluster
+(Figure 14, right).</p>
+
+<h3>Results of the cross-validation (14h)</h3>
+<figure><img src="figs/nb_196.png">
+<figcaption><b>Figure 22. Every variant model, cross-validated on the training and validation genes</b> (from 14h). The dashed line is
+ESM-1v alone. The same numbers are in the table below.</figcaption></figure>
+<table class="nobreak">
+<tr><th>Model (14h cross-validation, 15,339 variants)</th><th class="num">All variants</th><th class="num">Within genes (155)</th><th class="num">Where ESM is unsure</th></tr>
+<tr><td>ESM-1v LLR alone (no training)</td><td class="num">0.906</td><td class="num">0.885</td><td class="num">0.532</td></tr>
+<tr><td>Tolerance alone, own residue hidden (no training)</td><td class="num">0.837</td><td class="num">0.728</td><td class="num">0.747</td></tr>
+<tr><td>Logistic regression: ESM LLR + tolerance</td><td class="num">0.933</td><td class="num">0.889</td><td class="num">0.717</td></tr>
+<tr><td><b>Logistic regression: all 42 features</b> (chosen for §16)</td><td class="num"><b>0.961</b></td><td class="num"><b>0.920</b></td><td class="num"><b>0.867</b></td></tr>
+<tr><td>Gradient-boosted trees: all features</td><td class="num">0.958</td><td class="num">0.920</td><td class="num">0.854</td></tr>
+<tr><td>MLP: all features + ESM representation</td><td class="num">0.959</td><td class="num">0.920</td><td class="num">0.862</td></tr>
+<tr><td>Window CNN: raw variant positions + sequence + LLR</td><td class="num">0.943</td><td class="num">0.905</td><td class="num">0.798</td></tr>
+<tr><td>Window BiLSTM: raw variant positions + sequence + LLR</td><td class="num">0.950</td><td class="num">0.913</td><td class="num">0.818</td></tr>
+</table>
+<ul>
+<li>Combining all features lifts the AUROC from <b>0.906 (ESM-1v alone) to 0.961</b>; within genes from 0.885 to 0.920; where ESM is unsure
+from 0.53 (chance) to 0.87.</li>
+<li>Logistic regression, trees and the MLP all land at 0.958–0.961. The simplest one was chosen for the final test.</li>
+<li>The window networks, which learn their own smoothing from raw variant positions, came close (0.943–0.950) but didn't beat
+<code>convolve_v4</code> plus the other features.</li>
+</ul>
+
+<h3>Which feature groups matter?</h3>
+<figure><img src="figs/nb_198.png" style="width:86%; margin:0 auto;">
+<figcaption><b>Figure 23. Feature groups, alone and in combination</b> (from 14h, tree model). Top right is the direct test of the
+hypothesis: the gain when each group is added to the ESM scores.</figcaption></figure>
+<p>Added to ESM, human variants nearby gain +0.029 AUROC, structure +0.036, disorder and conservation +0.040. All three are real gains, but
+removing any single group from the full model costs at most 0.005 on all variants: the groups largely carry the same information, because
+they all mark constrained regions of the protein.</p>
+
+<!-- ============================================================ 8 -->
+<h2>8. The final test on untouched genes (§16)</h2>
+<figure><img src="figs/nb_235.png">
+<figcaption><b>Figure 24. The safeguards that keep the test honest</b> (from 16g): whole gene families in one split; every choice made
+without the test genes; the plan saved before the test; one run; uncertainty from resampling whole genes. Bottom: residue hiding.</figcaption></figure>
+
+<p>The plan (16a) fixed the primary model (logistic regression on all 42 features, trained on all 15,339 training and validation
+variants), the comparisons, and four questions, each passing only if the whole 95% range of the difference is above 0:</p>
+<table>
+<tr><th>Question</th><th class="num">Result</th><th class="num">95% range</th><th>Verdict</th></tr>
+<tr><td>Q1: the model beats ESM-1v on all variants (0.890 vs 0.620)</td><td class="num">+0.270</td><td class="num">+0.048 to +0.447</td><td><b>pass</b></td></tr>
+<tr><td>Q2: the model beats ESM-1v within genes (0.904 vs 0.749; 8 genes)</td><td class="num">+0.156</td><td class="num">−0.001 to +0.321</td><td>not shown</td></tr>
+<tr><td>Q3: the model beats ESM-1v where ESM is unsure (0.879 vs 0.545)</td><td class="num">+0.335</td><td class="num">+0.182 to +0.474</td><td><b>pass</b></td></tr>
+<tr><td>Q4: ESM + tolerance beats ESM alone (0.826 vs 0.620)</td><td class="num">+0.206</td><td class="num">+0.021 to +0.299</td><td><b>pass</b></td></tr>
+</table>
+
+<figure><img src="figs/nb_224.png">
+<figcaption><b>Figure 25. Every model on the test genes</b> (from 16d). Small vertical ticks mark each model's 14h cross-validation score
+for comparison.</figcaption></figure>
+<table class="nobreak">
+<tr><th>Model (§16 test genes, 1,357 variants)</th><th class="num">All variants (95% range)</th><th class="num">Within genes (8)</th><th class="num">Where ESM is unsure (668)</th></tr>
+<tr><td>ESM-1v LLR alone</td><td class="num">0.620 (0.51–0.92)</td><td class="num">0.749</td><td class="num">0.545</td></tr>
+<tr><td>Tolerance alone, own residue hidden</td><td class="num">0.828 (0.75–0.85)</td><td class="num">0.754</td><td class="num">0.839</td></tr>
+<tr><td>Logistic regression: ESM LLR + tolerance</td><td class="num">0.826 (0.78–0.94)</td><td class="num">0.831</td><td class="num">0.833</td></tr>
+<tr><td><b>Logistic regression: all 42 features</b> (primary)</td><td class="num"><b>0.890 (0.82–0.97)</b></td><td class="num"><b>0.904</b></td><td class="num"><b>0.879</b></td></tr>
+<tr><td>Gradient-boosted trees: all features</td><td class="num">0.860 (0.77–0.98)</td><td class="num">0.931</td><td class="num">0.840</td></tr>
+</table>
+<p class="small">The 95% ranges are wide because three genes hold half of the test variants: a resample that leaves out RYR1, or
+includes it twice, moves the result a lot. That is why each question in the table above compares two models on the <i>same</i> resamples.</p>
+
+<h3>What the model relies on</h3>
+<figure><img src="figs/nb_222.png">
+<figcaption><b>Figure 26. The final model's 15 largest weights</b> (from 16c), per standard deviation of each feature. Blue pushes towards
+benign, red towards pathogenic. The strongest is ESM's LLR, followed by the number of gnomAD variants nearby (tolerated region) and the
+number of ClinVar variants nearby (disease hotspot).</figcaption></figure>
+<p class="small">Weights of features that move together (such as the ClinVar counts and the gene-wide ClinVar rate) can't be read one at a
+time: the model can trade them against each other. Read the top of the list as "what the model leans on", not as separate causes.</p>
+
+<h3>A closer look (descriptive, after the test)</h3>
+<figure><img src="figs/f13_test_closer_look.png">
+<figcaption><b>Figure 27. Labels and decisions on the test genes</b> (redrawn from 16g). Top left: most labels in both sets rest on a
+single submitter (1 star); the test set's 3-star labels come almost entirely from RYR1's expert panel. Top right: three genes hold 52%
+of the test variants. Bottom left: at a cut-off of 0.5, 97% of benign variants are cleared but only 52% of pathogenic variants are caught.
+Bottom right: calibration by gene group. RYR1's variants get an average P(benign) of about 0.8, although most are pathogenic.</figcaption></figure>
+<figure><img src="figs/nb_239.png">
+<figcaption><b>Figure 28. Why ESM-1v scored lower on the test genes</b> (from 16g). In RYR1 and VHL, ESM gives pathogenic variants mild
+scores, close to ABL1's benign ones. In the other 82 test genes ESM-1v scores 0.911 and the model 0.963, the same gap as in 14h.</figcaption></figure>
+
+<div class="box key"><span class="label">What the test shows</span>
+<ul style="margin-bottom:0">
+<li>The model works on genes nobody chose (Q1), and helps most where evolution alone is at chance (Q3). Human variant data add to
+evolution in new genes (Q4).</li>
+<li>The size of the Q1 gap partly reflects this test set. Three genes hold half of it, and ESM struggles in two of them. In typical genes
+the gain is about +0.05 AUROC.</li>
+<li>The ranking is good, but the probabilities aren't yet trustworthy for new genes. Read them as ranks or recalibrate them. A plausible
+reason for the RYR1 miss: its expert-classified variants mostly concern malignant hyperthermia, which causes no symptoms without
+anaesthetic triggers, so carriers can look "healthy" in gnomAD.</li>
+</ul></div>
+
+<!-- ============================================================ 9 -->
+<h2>9. What improved, and the way back to your original goal</h2>
+<figure><img src="figs/f12_improvements.png">
+<figcaption><b>Figure 29. Every improvement in one place.</b> Left (Design A): within-gene Spearman with the tolerance target on the
+validation genes, against the noise ceiling. Right (Design B): AUROC for ESM-1v alone (grey) and the final model (blue), in
+cross-validation and on the untouched test genes.</figcaption></figure>
+
+<table>
+<tr><th>Metric</th><th>Baseline</th><th>Best result</th><th>Where</th></tr>
+<tr><td>Within-gene Spearman with the tolerance target</td><td class="num">0.020 (ESM-1v, no training)</td><td class="num">0.125 (ESM + BiLSTM head)</td><td>14f, validation genes; ceiling 0.39</td></tr>
+<tr><td>Same, with the pathogenic-only target</td><td class="num">—</td><td class="num">0.320 (linear probe)</td><td>14g; ceiling 0.61</td></tr>
+<tr><td>AUROC, all variants</td><td class="num">0.906 / 0.620</td><td class="num">0.961 / 0.890</td><td>14h cross-validation / §16 test</td></tr>
+<tr><td>AUROC within genes</td><td class="num">0.885 / 0.749</td><td class="num">0.920 / 0.904</td><td>14h / §16</td></tr>
+<tr><td>AUROC where ESM is unsure</td><td class="num">0.532 / 0.545</td><td class="num">0.867 / 0.879</td><td>14h / §16</td></tr>
+<tr><td>Accuracy at P(benign) ≥ 0.5</td><td class="num">—</td><td class="num">77%</td><td>§16 (52% of pathogenic caught)</td></tr>
+</table>
+
+<h3>Getting back to your original goal</h3>
+<p>Your goal was a model whose <i>prediction</i> is the tolerance score. Three routes lead there, and they can be combined:</p>
+<ol>
+<li><b>Train Design A on the better target.</b> Rebuild the target with the ClinVar side from pathogenic variants only
+(<code>CLINVAR_GROUPS = ("pathogenic",)</code> in §3), retrain the ESM heads on this laptop, then optionally run the LoRA fine-tuning on
+Biowulf (§15). The result is a sequence-only tolerance predictor with three times more learnable signal than now. It would need its own
+pre-registered test on the test genes. That is legitimate, because no Design A choice was based on the §16 result, but it should be
+reported as a separate analysis.</li>
+<li><b>Turn Design B into a tolerance score.</b> The final model can score <i>all 19 possible substitutions</i> at every residue: ESM,
+structure, annotations and nearby human variants exist for any residue. Averaging the 19 values of P(benign) gives one
+<b>model-predicted tolerance</b> per residue. It is available everywhere, including residues where no variant has been seen, and it comes
+from a model whose variant-level accuracy has been checked on untouched genes. This is the quickest way to "a prediction score that
+determines tolerance". The per-residue average itself would still need its own check, for example against the observed track.</li>
+<li><b>Combine them.</b> Feed Design A's predicted tolerance into the variant model as one more feature (§16h), so sequence-learned
+tolerance and observed human variation inform each other.</li>
+</ol>
+<div class="box plain"><span class="label">In plain words</span>
+Your original idea, predicting tolerance, is still alive. It was held back by a noisy target, not by the model. With the pathogenic-only
+target it becomes three times more learnable. Meanwhile, the variant model can already be turned into a per-residue tolerance score,
+built from a model whose accuracy has been checked on genes nobody chose.</div>
+
+<!-- ============================================================ 10 -->
+<h2>10. Glossary</h2>
+<table>
+<tr><th style="width:22%">Term</th><th>Meaning</th></tr>
+<tr><td>AUROC</td><td>the chance that a random benign variant gets a more benign score than a random pathogenic one. 0.5 = chance, 1 = perfect</td></tr>
+<tr><td>BLOSUM62, Grantham</td><td>tables of how different two amino acids are (evolutionary substitution rates; chemical distance)</td></tr>
+<tr><td>Bootstrap, 95% range</td><td>resampling the genes with replacement many times and keeping the middle 95% of the recomputed results</td></tr>
+<tr><td>Calibration, Brier score</td><td>whether stated probabilities match observed frequencies; the Brier score is their mean squared error (0 = perfect)</td></tr>
+<tr><td>Centring</td><td>subtracting each gene's median tolerance, so each track is measured from its own typical level</td></tr>
+<tr><td>Cluster</td><td>a group of related genes (similar sequence or same PANTHER family), always kept in the same split</td></tr>
+<tr><td>Cross-validation</td><td>fitting on 4/5 of the data and scoring the other 1/5, rotating, so every item is scored by a model that never saw it</td></tr>
+<tr><td>Early stopping</td><td>ending training when the score on set-aside data stops improving</td></tr>
+<tr><td>Epoch</td><td>one pass over all the training data</td></tr>
+<tr><td>ESM-1v, ESM-2</td><td>protein language models (650 million weights) trained on natural protein sequences</td></tr>
+<tr><td>Feature, input</td><td>a number the model is allowed to look at</td></tr>
+<tr><td>Fine-tuning, LoRA</td><td>continuing to train a pre-trained model on a new task; LoRA trains small add-on matrices instead of all its weights</td></tr>
+<tr><td>Frozen</td><td>a pre-trained model whose weights are kept fixed while something on top of it is trained</td></tr>
+<tr><td>LLR</td><td>log-likelihood ratio: log P(new amino acid) − log P(original), from ESM. Negative = unexpected swap</td></tr>
+<tr><td>Logistic regression</td><td>a weighted sum of features passed through an S-shaped curve to give a probability</td></tr>
+<tr><td>Loss</td><td>a number measuring how far the model's output is from the target; training makes it smaller</td></tr>
+<tr><td>Noise ceiling</td><td>the highest correlation any model could reach with a noisy target</td></tr>
+<tr><td>Overfitting</td><td>memorising the training data instead of learning rules that carry over to new data</td></tr>
+<tr><td>pLDDT</td><td>AlphaFold's confidence in its structure model at a residue (0–100)</td></tr>
+<tr><td>Representation</td><td>ESM's internal description of a residue: 1,280 numbers summarising its context</td></tr>
+<tr><td>Residue hiding</td><td>building a variant's human-variant features without any variant at its own residue</td></tr>
+<tr><td>RSA</td><td>relative solvent accessibility: the share of a residue's surface exposed to water</td></tr>
+<tr><td>Spearman correlation</td><td>agreement between two rankings: +1 same order, 0 unrelated, −1 reversed</td></tr>
+<tr><td>Target</td><td>the answer a model learns to produce</td></tr>
+<tr><td>Validation / test set</td><td>genes held out from training: validation for choosing between models, test for one final check</td></tr>
+<tr><td>VUS</td><td>variant of uncertain significance: a ClinVar entry with no pathogenic or benign call</td></tr>
+</table>
+
+</body>
+</html>

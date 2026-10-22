@@ -1,0 +1,187 @@
+{
+ "held_out_groups": {
+  "esm_llr": {
+   "mean": {
+    "gnomAD only": -5.774,
+    "ClinVar benign": -4.438,
+    "ClinVar vus": -5.53,
+    "ClinVar pathogenic": -10.527
+   },
+   "n": {
+    "gnomAD only": 32517,
+    "ClinVar benign": 1912,
+    "ClinVar vus": 27158,
+    "ClinVar pathogenic": 763
+   },
+   "AUROC gnomAD vs pathogenic": 0.8,
+   "AUROC gnomAD vs VUS": 0.475,
+   "AUROC VUS vs pathogenic": 0.813
+  },
+  "tolerance_v4_train": {
+   "mean": {
+    "gnomAD only": 0.196,
+    "ClinVar benign": 0.059,
+    "ClinVar vus": 0.041,
+    "ClinVar pathogenic": -0.336
+   },
+   "n": {
+    "gnomAD only": 32517,
+    "ClinVar benign": 1912,
+    "ClinVar vus": 27158,
+    "ClinVar pathogenic": 763
+   },
+   "AUROC gnomAD vs pathogenic": 0.896,
+   "AUROC gnomAD vs VUS": 0.665,
+   "AUROC VUS vs pathogenic": 0.805
+  }
+ },
+ "roc_untouched": {
+  "All test variants | ESM-1v alone": 0.62,
+  "All test variants | tolerance alone": 0.828,
+  "All test variants | logistic regression, 42 features": 0.89,
+  "Where ESM-1v is unsure | ESM-1v alone": 0.545,
+  "Where ESM-1v is unsure | tolerance alone": 0.839,
+  "Where ESM-1v is unsure | logistic regression, 42 features": 0.879
+ },
+ "test_questions": {
+  "Q1: primary beats ESM-1v on all variants": {
+   "difference": 0.27,
+   "lo": 0.0477,
+   "hi": 0.4472,
+   "passes": true
+  },
+  "Q2: primary beats ESM-1v within genes": {
+   "difference": 0.1556,
+   "lo": -0.0012,
+   "hi": 0.3207,
+   "passes": false
+  },
+  "Q3: primary beats ESM-1v where ESM is unsure": {
+   "difference": 0.3345,
+   "lo": 0.1815,
+   "hi": 0.474,
+   "passes": true
+  },
+  "Q4: human variant data adds to ESM": {
+   "difference": 0.2065,
+   "lo": 0.0209,
+   "hi": 0.2989,
+   "passes": true
+  }
+ },
+ "test_scores": {
+  "ESM-1v LLR": {
+   "AUROC": 0.6198,
+   "lo": 0.5057,
+   "hi": 0.9154,
+   "within-gene AUROC": 0.7485,
+   "AUROC where ESM is unsure": 0.5446
+  },
+  "tolerance (own residue hidden)": {
+   "AUROC": 0.8285,
+   "lo": 0.747,
+   "hi": 0.8546,
+   "within-gene AUROC": 0.7543,
+   "AUROC where ESM is unsure": 0.8388
+  },
+  "logistic: all features": {
+   "AUROC": 0.8898,
+   "lo": 0.8221,
+   "hi": 0.9746,
+   "within-gene AUROC": 0.9041,
+   "AUROC where ESM is unsure": 0.8791
+  },
+  "logistic: ESM LLR + tolerance": {
+   "AUROC": 0.8263,
+   "lo": 0.7782,
+   "hi": 0.94,
+   "within-gene AUROC": 0.8306,
+   "AUROC where ESM is unsure": 0.8333
+  },
+  "gradient-boosted trees: all features": {
+   "AUROC": 0.8597,
+   "lo": 0.7702,
+   "hi": 0.978,
+   "within-gene AUROC": 0.9311,
+   "AUROC where ESM is unsure": 0.8399
+  }
+ },
+ "feature_groups": {
+  "ESM scores": {
+   "alone": 0.9044,
+   "alone_within": 0.8892,
+   "gain": NaN,
+   "gain_lo": NaN,
+   "gain_hi": NaN,
+   "gain_within": NaN
+  },
+  "human variants nearby": {
+   "alone": 0.8938,
+   "alone_within": 0.7966,
+   "gain": 0.0289,
+   "gain_lo": 0.0182,
+   "gain_hi": 0.0402,
+   "gain_within": 0.0088
+  },
+  "gene-wide variant rates": {
+   "alone": 0.7206,
+   "alone_within": 0.5049,
+   "gain": 0.0074,
+   "gain_lo": -0.005,
+   "gain_hi": 0.0208,
+   "gain_within": -0.0121
+  },
+  "substitution type": {
+   "alone": 0.7132,
+   "alone_within": 0.7156,
+   "gain": 0.0154,
+   "gain_lo": 0.0065,
+   "gain_hi": 0.0292,
+   "gain_within": 0.0128
+  },
+  "structure (\u00a77)": {
+   "alone": 0.8752,
+   "alone_within": 0.798,
+   "gain": 0.0357,
+   "gain_lo": 0.0143,
+   "gain_hi": 0.066,
+   "gain_within": 0.0109
+  },
+  "annotations (\u00a78)": {
+   "alone": 0.7951,
+   "alone_within": 0.7162,
+   "gain": 0.0093,
+   "gain_lo": 0.003,
+   "gain_hi": 0.0168,
+   "gain_within": 0.0041
+  },
+  "disorder + conservation": {
+   "alone": 0.8928,
+   "alone_within": 0.8156,
+   "gain": 0.04,
+   "gain_lo": 0.0146,
+   "gain_hi": 0.0759,
+   "gain_within": 0.0169
+  }
+ },
+ "weights_top15": {
+  "esm_llr": 1.533,
+  "gnomad_within_15": 1.07,
+  "clinvar_within_15": -0.988,
+  "msa_conservation": -0.897,
+  "clinvar_per_residue": 0.853,
+  "iface_any": -0.489,
+  "rsa": 0.437,
+  "blosum62": -0.402,
+  "disorder": 0.374,
+  "clinvar_within_5": -0.333,
+  "tolerance": 0.292,
+  "esm_entropy": -0.267,
+  "gnomad_per_residue": -0.259,
+  "binding": -0.233,
+  "gnomad_within_5": 0.21
+ },
+ "esm_unsure_threshold": -4.013789176940918,
+ "plan_id": "9d090042fbe2",
+ "test_run": "2026-10-21 17:52"
+}

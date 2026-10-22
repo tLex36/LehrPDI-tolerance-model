@@ -1,0 +1,144 @@
+{
+ "primary model": "logistic: all features",
+ "models": {
+  "logistic: all features": {
+   "features": [
+    "esm_llr",
+    "esm_wt_lp",
+    "esm_entropy",
+    "esm_mean_llr",
+    "tolerance",
+    "gnomad_density",
+    "clinvar_density",
+    "gnomad_within_5",
+    "gnomad_within_15",
+    "clinvar_within_5",
+    "clinvar_within_15",
+    "gnomad_per_residue",
+    "clinvar_per_residue",
+    "blosum62",
+    "grantham",
+    "hydrophobicity_change",
+    "rsa",
+    "plddt",
+    "buried_sasa",
+    "iface_any",
+    "iface_homo",
+    "iface_hetero",
+    "ann_domain",
+    "ann_repeat",
+    "ann_motif",
+    "ann_motif_predicted",
+    "ann_binding_region",
+    "ann_lip",
+    "ann_lip_predicted",
+    "ann_ptm",
+    "ann_disulfide",
+    "ann_ligand_site",
+    "ann_active_site",
+    "ann_conserved_site",
+    "ann_coiled_coil",
+    "ann_transmembrane",
+    "ann_signal",
+    "n_annotations",
+    "disorder",
+    "binding",
+    "ann_disorder_curated",
+    "msa_conservation"
+   ],
+   "settings": "Pipeline(steps=[('simpleimputer',\n                 SimpleImputer(add_indicator=True, strategy='median')),\n                ('standardscaler', StandardScaler()),\n                ('logisticregression', LogisticRegression(max_iter=5000))])"
+  },
+  "logistic: ESM LLR + tolerance": {
+   "features": [
+    "esm_llr",
+    "tolerance"
+   ],
+   "settings": "Pipeline(steps=[('simpleimputer',\n                 SimpleImputer(add_indicator=True, strategy='median')),\n                ('standardscaler', StandardScaler()),\n                ('logisticregression', LogisticRegression(max_iter=5000))])"
+  },
+  "gradient-boosted trees: all features": {
+   "features": [
+    "esm_llr",
+    "esm_wt_lp",
+    "esm_entropy",
+    "esm_mean_llr",
+    "tolerance",
+    "gnomad_density",
+    "clinvar_density",
+    "gnomad_within_5",
+    "gnomad_within_15",
+    "clinvar_within_5",
+    "clinvar_within_15",
+    "gnomad_per_residue",
+    "clinvar_per_residue",
+    "blosum62",
+    "grantham",
+    "hydrophobicity_change",
+    "rsa",
+    "plddt",
+    "buried_sasa",
+    "iface_any",
+    "iface_homo",
+    "iface_hetero",
+    "ann_domain",
+    "ann_repeat",
+    "ann_motif",
+    "ann_motif_predicted",
+    "ann_binding_region",
+    "ann_lip",
+    "ann_lip_predicted",
+    "ann_ptm",
+    "ann_disulfide",
+    "ann_ligand_site",
+    "ann_active_site",
+    "ann_conserved_site",
+    "ann_coiled_coil",
+    "ann_transmembrane",
+    "ann_signal",
+    "n_annotations",
+    "disorder",
+    "binding",
+    "ann_disorder_curated",
+    "msa_conservation"
+   ],
+   "settings": "HistGradientBoostingClassifier(l2_regularization=1.0, learning_rate=0.05,\n                               max_iter=300, max_leaf_nodes=15,\n                               min_samples_leaf=40, random_state=0)"
+  }
+ },
+ "single scores": {
+  "ESM-1v LLR": "esm_llr",
+  "tolerance (own residue hidden)": "tolerance"
+ },
+ "questions": {
+  "Q1: primary beats ESM-1v on all variants": [
+   "logistic: all features",
+   "ESM-1v LLR",
+   "all variants"
+  ],
+  "Q2: primary beats ESM-1v within genes": [
+   "logistic: all features",
+   "ESM-1v LLR",
+   "within genes"
+  ],
+  "Q3: primary beats ESM-1v where ESM is unsure": [
+   "logistic: all features",
+   "ESM-1v LLR",
+   "ESM unsure"
+  ],
+  "Q4: human variant data adds to ESM": [
+   "logistic: ESM LLR + tolerance",
+   "ESM-1v LLR",
+   "all variants"
+  ]
+ },
+ "pass rule": "the whole 95% range of the AUROC difference is above 0",
+ "bootstrap": "1000 resamples of whole genes, seed 0",
+ "within genes": "mean AUROC over genes with >= 3 pathogenic and >= 3 benign variants",
+ "ESM unsure": "esm_llr above the median esm_llr of benign TRAINING variants",
+ "variants": "ClinVar pathogenic / benign missense, >= 1 review star; own residue hidden in 5 groups (14h)",
+ "target recipe (\u00a73)": {
+  "GNOMAD_MIN_COUNT": 2,
+  "CLINVAR_GROUPS": null,
+  "X_MODE": "hemizygous"
+ },
+ "plan_id": "9d090042fbe2",
+ "written": "2026-10-21 17:50"
+}
