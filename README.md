@@ -16,7 +16,7 @@ AUROC **0.89** for the model vs **0.62** for ESM-1v alone.
 | `figures/*.py` | helper modules (`convolve.py`, `tolerance.py`, `structure.py`, `evolution_conservation.py`, `struct_render.py`, ...) |
 | `figures/results/tolerance_model/final_test/` | pre-registered plan, test predictions and results |
 | `figures/results/tolerance_model/poster/` | poster SVGs, PNG previews, captions (`poster_text.md`), figure scripts |
-| `figures/results/tolerance_model/report/` | plain-language guide to how the model was trained (PDF / DOCX / HTML) |
+| `figures/results/tolerance_model/report/` | plain-language guide to how the model was trained, plus Part II on the poster: each panel, a presentation script, likely questions and a pre-print checklist (PDF / DOCX / HTML) |
 | `tools/poster_layout/` | scripts used to lay out the PowerPoint poster and its references |
 
 ## Data not included

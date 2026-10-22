@@ -44,6 +44,8 @@
   .qa b { color: var(--ink); }
   .nobreak { break-inside: avoid; }
   .pb { break-before: page; }
+  td code { overflow-wrap: anywhere; word-break: break-word; }
+  table.fixed { table-layout: fixed; }
 </style>
 </head>
 <body>
@@ -51,9 +53,11 @@
 <!-- ============================================================ COVER + SHORT ANSWERS -->
 <h1>How the tolerance models were built, trained and tested</h1>
 <div class="subtitle">A plain-language guide to notebook <code>05_tolerance_score_modelling</code>, sections 3–16:
-which data went where, what each model learned from, and how accuracy was measured</div>
+which data went where, what each model learned from, and how accuracy was measured. <b>Part II</b> adds the poster for JHU Building
+Bridges (23 October 2026): what is on it, how each panel was made, and how to present it</div>
 <div class="meta">Results as of 21 October 2026 (final test run at 17:52, plan <code>9d090042fbe2</code>). Every number below is taken
-from the notebook's outputs and the saved files in <code>results/tolerance_model/</code>.</div>
+from the notebook's outputs and the saved files in <code>results/tolerance_model/</code>. Part II (sections 10–17) added on
+22 October 2026, describing the poster as exported that afternoon.</div>
 
 <div class="box warn">
 <span class="label">First, the most important point</span>
@@ -61,6 +65,13 @@ Your original goal was a model that <b>predicts the tolerance score</b>, so that
 That model exists (§11–§13) and was tested on the validation genes in §14. But the model tested on the untouched genes in
 §16 is a different design: it <b>predicts the ClinVar label</b> (pathogenic or benign) of each variant, and the tolerance score is one of
 its <i>inputs</i>. Section 1 explains the two designs side by side. Section 9 lays out three ways to get back to your original goal.
+</div>
+
+<div class="box key">
+<span class="label">Preparing for the poster? Start with Part II</span>
+Section 11 is the poster at a glance, with the numbers worth knowing by heart. Sections 12–14 explain every panel, section 15 is a short
+script, section 16 lists the questions you are likely to get with answers, and section 17 is a checklist of things on the poster to fix
+or be ready for. The most urgent: the poster's QR code opens an older repository, and this project's repository is private.
 </div>
 
 <h3>The short answers to your questions</h3>
@@ -89,6 +100,7 @@ is the <b>within-gene Spearman correlation</b>. It rose from 0.02 (ESM alone) to
 
 <h3>Contents</h3>
 <div class="toc">
+<div><b>Part I: the models (21 October)</b></div>
 <div>1. Two ways to build a tolerance model</div>
 <div>2. The ingredients, and where each one went</div>
 <div>3. Step 1: turning variants into a tolerance score</div>
@@ -98,14 +110,24 @@ is the <b>within-gene Spearman correlation</b>. It rose from 0.02 (ESM alone) to
 <div>7. Design B in practice: predicting the ClinVar label</div>
 <div>8. The final test on untouched genes (§16)</div>
 <div>9. What improved, and the way back to your original goal</div>
-<div>10. Glossary</div>
+<div><b>Part II: the poster (22 October)</b></div>
+<div>10. What was done on 22 October</div>
+<div>11. The poster at a glance</div>
+<div>12. Background panels</div>
+<div>13. Methods panels</div>
+<div>14. Results panels</div>
+<div>15. Presenting it</div>
+<div>16. Questions to expect</div>
+<div>17. Before you present: a checklist</div>
+<div>18. Glossary</div>
 </div>
 
 <h3>How to read this guide</h3>
 <ul>
 <li><b>§ numbers</b> (§3, §14, …) are section numbers in the notebook; <b>14a–14i</b> and <b>16a–16h</b> are its subsections.</li>
 <li>Sections 1–2 give the big picture. Sections 3–4 explain the data, section 5 the accuracy metrics, sections 6–8 the models and
-their results, and section 9 what it all means. Words in <b>bold</b> are explained where they first appear and again in the glossary.</li>
+their results, and section 9 what it all means. Sections 10–17 (Part II) are about the poster. Words in <b>bold</b> are explained
+where they first appear and again in the glossary.</li>
 <li>Figures marked "from 14f", "from 16g" and so on are copied unchanged from the notebook's outputs. The others were drawn for this
 guide from the same saved results. All figures are high resolution: zoom in on any detail.</li>
 <li>Two designs run through the whole guide. In <b>Design A</b> (your original goal) the model <i>predicts</i> the tolerance score. In
@@ -619,16 +641,532 @@ Your original idea, predicting tolerance, is still alive. It was held back by a 
 target it becomes three times more learnable. Meanwhile, the variant model can already be turned into a per-residue tolerance score,
 built from a model whose accuracy has been checked on genes nobody chose.</div>
 
+<!-- ============================================================ PART II: THE POSTER -->
 <!-- ============================================================ 10 -->
-<h2>10. Glossary</h2>
+<h2>10. Part II: the poster, and what was done on 22 October</h2>
+<p>Part I (sections 1–9) explains how the models were built and tested. Part II covers the work done on <b>22 October 2026</b> to turn
+the project into the poster for <b>JHU Building Bridges (23 October 2026)</b>, and is meant for preparing the presentation:</p>
+<ul>
+<li>Section 11 is the poster at a glance.</li>
+<li>Sections 12–14 go through the poster panel by panel: what each one shows, how it was made, and what to say.</li>
+<li>Section 15 is a short script.</li>
+<li>Section 16 lists the questions you are likely to get, with answers.</li>
+<li>Section 17 is a checklist of things on the poster to fix or be ready for.</li>
+</ul>
+<p>Part I is unchanged except for one correction: the gnomAD legend of Figure 3 now says "seen at least twice (allele count ≥ 2)"
+instead of "seen in ≥ 2 people", because one person carrying both copies also meets the filter.</p>
+
+<h3>What was done today</h3>
+<table class="fixed">
+<tr><th style="width:20%">Task</th><th style="width:50%">What came out of it</th><th style="width:30%">Where it is</th></tr>
+<tr><td>Questions about the final model</td><td>Clarified that the final model is a logistic regression that predicts each variant's ClinVar label
+(as P(benign)), not a BiLSTM and not the tolerance score. Also covered which models ran on the untouched genes, and how the model might do
+on VUS. The answers are folded into section 16.</td><td>this guide, sections 8 and 16</td></tr>
+<tr><td>First set of poster figures</td><td>11 editable SVGs (I1, M1–M4, R1–R5) with copy-ready captions, the numbers behind them, and the
+"honest limits" notes.</td><td><code>poster/svg/</code>, <code>poster/poster_text.md</code>, <code>poster/poster_numbers.json</code></td></tr>
+<tr><td>Conservation across evolution (I0)</td><td>New data from Ensembl 116:
+<ul style="margin:3pt 0 0 0">
+<li><b>Protein:</b> % similarity of human proteins to their orthologues in 17 species, for postsynaptic proteins (1,080 genes),
+olfactory receptors (399) and ribosomal proteins (86).</li>
+<li><b>DNA:</b> % identity in genome alignments for 80 regulatory elements and 80 coding regions.</li>
+<li><b>Changes on request:</b> protein numbers switched from identity to similarity, and the whole-genome column replaced by coding regions.</li>
+</ul></td>
+<td><code>figures/evolution_conservation.py</code>; the downloaded data are cached in <code>poster/conservation_cache/</code>, which is not in
+GitHub but can be re-fetched</td></tr>
+<tr><td>Tolerance diagram (M0)</td><td>A schematic of the tolerance recipe on a simulated protein. The lollipop length shows severity, with a
+fixed head size. It shows the wide window (w = 31) in a structured region and the narrow one (w = 5) in an unstructured region.</td>
+<td><code>poster/svg/M0_tolerance_diagram.svg</code></td></tr>
+<tr><td>GLRA1 structure figures (M3a–M3d)</td><td>The AlphaFold model (structured vs unstructured, with annotations along the C-terminal
+half); core vs surface and the glycine-binding interfaces from the cryo-EM structure with glycine bound (PDB 8DN5); the database table;
+an interactive 3D view.</td><td><code>poster/svg/M3*.svg</code>; renderer <code>figures/struct_render.py</code></td></tr>
+<tr><td>Notebook 06</td><td>One notebook regenerates all 17 poster figures (45 cells, about 4 minutes) and explains each one.</td>
+<td><code>figures/notebooks/06_poster_figures.ipynb</code></td></tr>
+<tr><td>Poster layout and citations</td><td>Alignment, spacing and font sizes cleaned up, the new phylogeny inserted, and 18 references added as
+numbered superscripts (APA style). This was written to a new file, so the original is untouched. You then edited it further (title,
+arrangement of the figures) and exported a PDF. Part II describes that final version.</td>
+<td><code>~/Documents/Work/Presentations/JHU_building_bridges_10.23.26_poster_layout.pptx</code> and <code>.pdf</code>; script in
+<code>tools/poster_layout/</code></td></tr>
+<tr><td>Title</td><td><i>Human Variant Tolerance and Protein Structure Sharpen Missense Pathogenicity Prediction in Postsynaptic
+Proteins</i></td><td>on the poster</td></tr>
+<tr><td>GitHub repository</td><td>The code, notebooks 05 and 06, poster figures and this guide. It leaves out large data files, credentials,
+HGMD data and third-party published figures.</td><td><code>github.com/tLex36/LehrPDI-tolerance-model</code> (private)</td></tr>
+</table>
+
+<!-- ============================================================ 11 -->
+<h2>11. The poster at a glance</h2>
+<figure><img src="figs/p01_poster_overview.png" style="width:90%; margin:0 auto;">
+<figcaption><b>Figure 30. The poster as exported on 22 October</b> (48 × 36 in). Background on the left, Methods across the top right,
+Results and Citations along the bottom right.</figcaption></figure>
+
+<h3>The story in one line per section</h3>
+<table>
+<tr><th style="width:22%">Section</th><th>What it says</th></tr>
+<tr><td>Background</td><td>Most missense variants are harmless and the damaging ones are hard to spot. Evolution-based prediction (ESM)
+helps. Postsynaptic proteins are highly conserved, yet they are where many neurodevelopmental-disorder mutations converge.</td></tr>
+<tr><td>Methods: tolerance</td><td>A per-residue tolerance score: where healthy people carry variants (gnomAD) minus where clinical variants
+cluster (ClinVar). It separates held-out ClinVar variants from gnomAD variants where ESM cannot.</td></tr>
+<tr><td>Methods: structure</td><td>Each residue gets structural context: disorder, burial (RSA), interfaces, domains and motifs. Shown on
+GLRA1.</td></tr>
+<tr><td>Methods: encoded features</td><td>Everything is lined up per residue, then turned into 42 numbers per variant.</td></tr>
+<tr><td>Results</td><td>Eight models were compared. A simple logistic regression was as good as any and, on 85 untouched genes, reached
+AUROC 0.89 against 0.62 for ESM-1v alone.</td></tr>
+</table>
+
+<p><b>The title, piece by piece.</b> "Human Variant Tolerance" is the tolerance score; "Protein Structure" is the structural features;
+"Sharpen Missense Pathogenicity Prediction" means improving on ESM-1v alone (0.89 vs 0.62); "in Postsynaptic Proteins" refers to the
+1,080 SynGO genes.</p>
+
+<div class="box key"><span class="label">Numbers worth knowing by heart</span>
+<table style="margin:2pt 0 0 0">
+<tr><td style="width:38%">Genes studied</td><td>1,080 postsynaptic (SynGO) genes</td></tr>
+<tr><td style="width:38%">Training and validation variants</td><td>15,339 ClinVar variants (5,449 pathogenic, 9,890 benign) in 716 genes</td></tr>
+<tr><td style="width:38%">Features per variant</td><td>42</td></tr>
+<tr><td style="width:38%">Untouched test set</td><td>1,357 variants (602 pathogenic, 755 benign) in 85 genes</td></tr>
+<tr><td style="width:38%">AUROC on the test genes</td><td>model 0.89; tolerance alone 0.83; ESM-1v alone 0.62</td></tr>
+<tr><td style="width:38%">Where ESM-1v is unsure (668 variants)</td><td>model 0.88 vs ESM-1v 0.55</td></tr>
+<tr><td style="width:38%">Cross-validation</td><td>model 0.961 vs ESM-1v 0.906</td></tr>
+</table></div>
+
+<!-- ============================================================ 12 -->
+<h2>12. Background panels</h2>
+
+<h3>From genome to damaging missense variants</h3>
+<figure><img src="figs/p02_genome_to_missense.png" style="width:72%; margin:0 auto;">
+<figcaption><b>Figure 31. The problem in one flowchart.</b> From the whole genome down to the missense variants that are hard to
+interpret.</figcaption></figure>
+<p><b>What to say:</b> "Each of us carries thousands of protein-changing variants. Truncating variants are usually clearly damaging,
+but most protein-changing variants are missense: a single amino acid swapped. Most of those are tolerated, and the damaging ones are
+hard to predict. That's the gap this project works on."</p>
+<div class="box warn"><span class="label">Check the numbers before presenting</span>
+The flowchart has no citation, and two of its numbers are lower than the standard reference. The 1000 Genomes Project (2015) reports
+that a typical genome differs from the reference at <b>4.1–5.0 million</b> sites, with <b>149–182</b> protein-truncating and
+<b>10,000–12,000</b> peptide-altering sites. Compare that with "~2 million variants" and "~500 missense variants" on the poster. If your
+numbers come from a different definition (for example rare variants only), be ready to say which; otherwise consider updating them.
+"~100 loss-of-function" is in line with published estimates.</div>
+
+<h3>Evolutionary Scale Modelling</h3>
+<figure><img src="figs/p03_esm_and_conservation.png">
+<figcaption><b>Figure 32. ESM and conservation.</b> Left: how ESM is trained (adapted from Meier et al., 2021) and ESM-1b scores of
+ClinVar and gnomAD variants (adapted from Brandes et al., 2023). Right: conservation across the species tree (Figure 33).</figcaption></figure>
+<ul>
+<li><b>What ESM is:</b> a protein language model trained on about 250 million natural protein sequences. During training it learns to
+predict amino acids that have been hidden. The score for a variant is the <b>LLR</b>: how much less likely ESM finds the new amino acid
+than the original. Strongly negative means "evolution rarely allows this".</li>
+<li><b>What the histogram shows:</b> ClinVar pathogenic variants get lower (more negative) scores than benign or gnomAD variants. This is
+Brandes et al.'s figure, made with <b>ESM-1b</b>. Your model uses <b>ESM-1v</b>, a sibling trained specifically for variant effects. If
+asked, the two behave similarly.</li>
+<li><b>Your own numbers, held-out variants</b> (I1, made today but not on the poster):
+  <ul>
+  <li>mean LLR: gnomAD −5.77, ClinVar benign −4.44, VUS −5.53, pathogenic −10.53;</li>
+  <li>ESM-1v separates gnomAD from pathogenic variants well (AUROC 0.80);</li>
+  <li>it cannot tell VUS from gnomAD variants (0.48). That is the opening for human variation.</li>
+  </ul></li>
+</ul>
+
+<h3>Conservation across evolution</h3>
+<figure><img src="figs/p03b_conservation_phylogeny.png" style="width:86%; margin:0 auto;">
+<figcaption><b>Figure 33. How much human sequence is conserved, from chimpanzee to <i>C. elegans</i></b> (Ensembl 116).
+<ul>
+<li><b>Protein columns:</b> the median % similarity to the orthologue (bold), and the share of genes that have one (small %).</li>
+<li><b>DNA columns:</b> % of human bases identical in Ensembl's pairwise genome alignments.</li>
+<li><b>Hatched cells:</b> fewer than 10% of genes have an orthologue, or Ensembl has no genome alignment for that species.</li>
+</ul></figcaption></figure>
+<p><b>How it was made</b>:</p>
+<ul>
+<li><b>Similarity</b> counts identical amino acids plus conservative swaps (positive BLOSUM62 score), over Ensembl's orthologue
+alignments.</li>
+<li><b>DNA identity</b> uses 80 randomly chosen non-promoter regulatory elements from the Ensembl Regulatory Build and 80 random coding
+exons, each up to 1 kb. Bases that don't align count as not identical.</li>
+</ul>
+<table>
+<tr><th></th><th class="num">Mouse</th><th class="num">Chicken</th><th class="num">Zebrafish</th><th class="num">Fly</th><th class="num">Worm</th></tr>
+<tr><td>Postsynaptic protein (similarity)</td><td class="num">97%</td><td class="num">90%</td><td class="num">81%</td><td class="num">59% (55% have one)</td><td class="num">51% (53%)</td></tr>
+<tr><td>Ribosomal protein</td><td class="num">100%</td><td class="num">98%</td><td class="num">96%</td><td class="num">84%</td><td class="num">80%</td></tr>
+<tr><td>Coding DNA (identity)</td><td class="num">82%</td><td class="num">51%</td><td class="num">46%</td><td class="num">no alignment</td><td class="num">no alignment</td></tr>
+<tr><td>Regulatory DNA</td><td class="num">33%</td><td class="num">3.5%</td><td class="num">0.2%</td><td class="num">no alignment</td><td class="num">no alignment</td></tr>
+</table>
+<p><b>What to say:</b> "Postsynaptic proteins are highly conserved across vertebrates: 81% similar even in zebrafish. Ribosomal proteins,
+the classic conserved set, are conserved across all animals. Olfactory receptors and regulatory DNA are conserved only among mammals.
+So evolution constrains these proteins strongly, which is why an evolution-based model like ESM does well on them, but it can't tell us
+about constraint that is specific to humans."</p>
+<div class="nobreak"><p class="small"><b>Points to be ready for:</b></p>
+<ul class="small">
+<li><b>Overlap between columns:</b> all 86 ribosomal proteins are also in the postsynaptic set, because SynGO annotates postsynaptic
+ribosomes (local translation at the synapse).</li>
+<li><b>Few olfactory-receptor orthologues:</b> the receptor family expands and contracts quickly, so one-to-one orthologues are rare
+outside mammals.</li>
+<li><b>"No alignment" for fly and worm DNA:</b> Ensembl doesn't align the human genome to such distant species. The same holds for a few
+mammals, such as rat and cow.</li>
+</ul></div>
+
+<h3>Convergence of neurodevelopmental-disorder mutations on synaptic genes</h3>
+<figure><img src="figs/p04_ndd_convergence.png">
+<figcaption><b>Figure 34. Why postsynaptic proteins.</b>
+<ul>
+<li><b>Left:</b> an interaction network of autism genes in human neurons (Pintacuda et al., 2023), an autism GWAS (Grove et al., 2019) and
+a pedigree.</li>
+<li><b>Centre:</b> the synapse diagram (Bemben et al., 2015).</li>
+<li><b>Right:</b> the disorders involved.</li>
+</ul></figcaption></figure>
+<p><b>What to say:</b> "Genetic studies of autism and other neurodevelopmental disorders keep pointing at the same synaptic genes.
+Synaptic proteins are highly conserved in evolution but very sensitive to mutation, and many of their variants are still unclassified. So
+they are a good place to test whether human variation adds something that evolution can't see."</p>
+
+<!-- ============================================================ 13 -->
+<h2>13. Methods panels</h2>
+
+<h3>Calculating tolerance scores</h3>
+<figure><img src="figs/p05_tolerance_scores.png" style="width:78%; margin:0 auto;">
+<figcaption><b>Figure 35. The tolerance recipe.</b> Top: the schematic (M0, a simulated protein with the real recipe). Bottom: the real score
+along GLRA1 (M1), with the pathogenic p.A300P in an intolerant dip.</figcaption></figure>
+<ol>
+<li><b>Collect the variants:</b> missense variants from gnomAD v4.1 (seen at least twice) and from ClinVar (any classification).</li>
+<li><b>Weight each variant</b> by how drastic its swap is, which is the lollipop length. Structured regions use BLOSUM62, which
+reflects which swaps evolution tolerates in folded proteins. Unstructured regions (AIUPred ≥ 0.5) use the Grantham distance, which
+measures how chemically different two amino acids are.</li>
+<li><b>Smooth the weights</b> with a binomial window: wide in structured regions (w = 31), where neighbours in the fold share constraint,
+and narrow in unstructured regions (w = 5), where function sits in short motifs.</li>
+<li><b>Scale and subtract:</b> each density is scaled 0–1 within the gene, and tolerance = gnomAD − ClinVar. Above 0 (blue) means more
+healthy variation than clinical reports (tolerated); below 0 (red) means intolerant.</li>
+</ol>
+<p class="small">Wording: a binomial window puts most of its weight near the centre. 97% of a w = 31 window lies within ±8 residues, and
+98% of a w = 5 window within ±3. So "w = 31" is the window's full reach, not its effective width.</p>
+
+<h3>Tolerance scores distinguish unannotated variants</h3>
+<figure><img src="figs/p06_tolerance_vs_esm_heldout.png" style="width:86%; margin:0 auto;">
+<figcaption><b>Figure 36. Held-out variants: tolerance separates ClinVar from gnomAD variants, ESM does not</b> (from notebook 05, §6).
+<ul>
+<li><b>The test:</b> 10% of variants were held out, and tolerance was rebuilt from the other 90%.</li>
+<li><b>Which variants:</b> held-out variants found in only one database, at residues where another substitution had been observed, so
+that both scores exist. That gives 5,657 ClinVar and 15,002 gnomAD variants.</li>
+</ul></figcaption></figure>
+<table>
+<tr><th>Score</th><th class="num">ClinVar mean</th><th class="num">gnomAD mean</th><th class="num">AUROC</th><th class="num">Cohen's d</th><th class="num">KS D</th></tr>
+<tr><td>Tolerance (rebuilt from 90%)</td><td class="num">−0.126</td><td class="num">+0.234</td><td class="num">0.19 (i.e. 0.81)</td><td class="num">−1.24</td><td class="num">0.48</td></tr>
+<tr><td>ESM: worst observed at the residue</td><td class="num">−6.14</td><td class="num">−5.90</td><td class="num">0.50</td><td class="num">−0.07</td><td class="num">0.05</td></tr>
+<tr><td>ESM LLR of the variant itself</td><td class="num">−5.83</td><td class="num">−5.65</td><td class="num">0.51</td><td class="num">−0.05</td><td class="num">0.06</td></tr>
+</table>
+<p><b>Reading the statistics.</b> These are the numbers in the small boxes on the poster.</p>
+<ul>
+<li><b>AUROC 0.19:</b> the chance that a random ClinVar variant has the <i>higher</i> tolerance score than a random gnomAD variant.
+Read the other way round: in 81% of pairs, the gnomAD variant sits in the more tolerant region.</li>
+<li><b>Cohen's d = −1.24:</b> the two means are 1.24 standard deviations apart, which is a large effect.</li>
+<li><b>KS D = 0.48:</b> the largest gap between the two cumulative distributions.</li>
+<li><b>For ESM:</b> 0.50 and d ≈ 0 mean no separation at all.</li>
+</ul>
+<div class="box warn"><span class="label">Be careful when presenting this panel</span>
+<ul style="margin-bottom:0">
+<li><b>"Unannotated" means "every ClinVar entry".</b> The ClinVar group is every held-out ClinVar variant whatever its classification:
+mostly VUS, but it also includes some pathogenic and benign entries. Safer wording: "ClinVar variants, most of them of uncertain
+significance".</li>
+<li><b>Part of the separation is built in.</b> The ClinVar side of the tolerance score counts every ClinVar entry. The held-out variant
+itself was not counted, but its ClinVar neighbours were. Labs submit many variants from the same clinically tested genes and regions, so a
+ClinVar variant tends to sit near other ClinVar variants. So say "ClinVar variants, mostly VUS, sit in less tolerant regions than gnomAD
+variants, a difference ESM cannot see", not "VUS are pathogenic".</li>
+<li><b>Cleaner evidence to point to:</b>
+  <ul>
+  <li>ClinVar <i>pathogenic</i> vs gnomAD variants: tolerance AUROC 0.90 vs ESM 0.80 (M2, not on the poster);</li>
+  <li>the untouched-gene test, where tolerance alone reached 0.83 vs ESM's 0.62 (Results).</li>
+  </ul></li>
+</ul></div>
+
+<h3>Structural features</h3>
+<figure><img src="figs/p07_structure_left.png" style="width:62%; margin:0 auto;">
+<figcaption><b>Figure 37. Structured vs unstructured, domains and motifs, and where each feature comes from</b> (M3a tracks and the M3d
+table).</figcaption></figure>
+<figure><img src="figs/p08_structure_right.png" style="width:80%; margin:0 auto;">
+<figcaption><b>Figure 38. GLRA1 in 3D.</b>
+<ul>
+<li><b>Centre:</b> the AlphaFold model with structured (blue-grey) and unstructured (yellow) regions and annotated stretches.</li>
+<li><b>Top right:</b> a slice through the extracellular domain at the level where glycine binds (PDB 8DN5), coloured by burial.</li>
+<li><b>Bottom right:</b> the same slice with both neighbouring subunits, showing the glycine-binding interfaces.</li>
+</ul></figcaption></figure>
+
+<p><b>Why GLRA1 as the example.</b> It is the α1 subunit of the glycine receptor, an inhibitory channel. Its mutations cause hyperekplexia
+(startle disease). It has high-quality cryo-EM structures with glycine bound, and the running example of Part I, p.A300P, is a
+pathogenic variant in the short M2–M3 loop just after the second transmembrane helix, at a subunit interface.</p>
+
+<table>
+<tr><th style="width:20%">Sub-panel</th><th>What it shows</th><th style="width:34%">Numbers to know</th></tr>
+<tr><td>Structured vs unstructured</td><td>AIUPred predicts disorder from sequence. Residues scoring ≥ 0.5 count as unstructured. This
+decides the window size and substitution table of the tolerance score, and gives the "disorder" and "binding" features.</td>
+<td>119 of 449 GLRA1 residues are unstructured: the N-terminus, the M3–M4 intracellular loop and the end of M4. AlphaFold agrees: mean
+pLDDT 63 in unstructured vs 93 in structured residues.</td></tr>
+<tr><td>Domains and motifs</td><td>Unstructured regions often work through short binding motifs, so annotation databases flag functional
+stretches that structure can't reveal. The table names each database, what it looks for, and what that means for the protein.</td>
+<td>Examples in the unstructured C-terminal half:
+<ul style="margin:2pt 0 0 0">
+<li>a predicted binding stretch E341–K353 (ELLRFRRKRRHHK);</li>
+<li>a curated proline-rich binding stretch T391–S398 (TNPPPAPS);</li>
+<li>lipid contacts along the end of M4.</li>
+</ul></td></tr>
+<tr><td>Surface vs core</td><td>Relative solvent accessibility (RSA): the share of a residue's surface exposed to water. Core &lt; 0.2,
+boundary 0.2–0.4, surface &gt; 0.4. Core residues fill the space between the two β-sheets and hold the fold together.</td>
+<td>The model's RSA for GLRA1 comes from cryo-EM structure 8DN3 chain A for 336 residues and from AlphaFold for 41. The remaining 72
+(low-confidence regions) are left blank.</td></tr>
+<tr><td>Interface</td><td>Glycine binds <i>between</i> two subunits, so each binding pocket is built from residues of both.</td>
+<td>One pocket: F187, Y230 and F235 of one α1 subunit with F91, R93 and S157 of the next (mature numbering F159, Y202, F207 / F63, R65,
+S129). The model's interface feature (PDBe-KB) flags 101 of the 105 contact residues seen in 8DN5.</td></tr>
+</table>
+
+<div class="box key"><span class="label">A strong verbal point that isn't printed on the poster</span>
+<p>The full versions of M3b and M3c end with a bar chart: the share of held-out ClinVar variants that are pathogenic in each structural
+class, pooled over all genes (not only GLRA1). Exposed residues are tolerant, unless they form an interface or bind a ligand, in which
+case they are as constrained as the core.</p>
+<table style="margin:2pt 0 0 0">
+<tr><th>Class</th><th class="num">% pathogenic</th><th class="num">Variants</th></tr>
+<tr><td>Ligand-binding residues</td><td class="num">86%</td><td class="num">99</td></tr>
+<tr><td>Interface (exposed, touching another protein)</td><td class="num">68%</td><td class="num">174</td></tr>
+<tr><td>Core (RSA &lt; 0.2)</td><td class="num">60%</td><td class="num">547</td></tr>
+<tr><td>Boundary (0.2–0.4)</td><td class="num">27%</td><td class="num">235</td></tr>
+<tr><td>Surface, not interface (&gt; 0.4)</td><td class="num">15%</td><td class="num">344</td></tr>
+</table></div>
+<p class="small">About the C-terminal annotations: the RFRRK core of E341–K353 matches a reported Gβγ-binding motif (Yevenes et al.,
+<i>PNAS</i> 2008). That link comes from the literature, not from the model; check the paper before quoting it. UniProt's natural-variant
+and mutagenesis annotations were deliberately excluded from the features, so clinical labels can't leak into them.</p>
+
+<h3>Encoded features for model training</h3>
+<figure><img src="figs/p09_encoded_features.png">
+<figcaption><b>Figure 39. Every data source lined up per residue</b>, shown for GLRA1 residues 297–303. Column colours give the type of
+feature: sequence, human-variant, evolutionary, structural, and annotation/disorder/conservation.</figcaption></figure>
+<ul>
+<li><b>Per residue:</b> each residue gets one row of features. These are the tracks on the left and the table on the right.</li>
+<li><b>Per variant:</b> a variant copies the row of the residue it sits on, then adds features of the swap itself (ESM-1v LLR of that
+exact change, BLOSUM62 and Grantham, change in hydrophobicity). The human-variant features are recomputed with the variant's own residue
+hidden, so no variant counts towards its own score. This gives 42 numbers per variant.</li>
+<li><b>Reading residue 300:</b> it is exposed (RSA 0.64) yet sits at an interface, in a low-tolerance stretch (−0.35), with an
+unfavourable ESM score. That combination is what the model reads as "likely pathogenic".</li>
+</ul>
+
+<!-- ============================================================ 14 -->
+<h2>14. Results panels</h2>
+<figure><img src="figs/p10_results.png">
+<figcaption><b>Figure 40. Results.</b> Left: every model's AUROC in cross-validation and on the untouched genes. Centre: how the logistic
+regression turns the 42 features into P(benign), with the 1,357 test variants. Right: ROC curves on the test genes.</figcaption></figure>
+
+<h3>The model table</h3>
+<ul>
+<li><b>Cross-validation:</b> 15,339 variants in 716 genes, 5 folds, with related genes always kept in the same fold.</li>
+<li><b>The finding:</b> the simple logistic regression (0.961) matched or beat gradient-boosted trees, an MLP, a CNN and a BiLSTM. The
+limit is the information in the data, not the complexity of the model.</li>
+<li><b>Primary model:</b> logistic regression was fixed as the primary model before the test.</li>
+<li><b>"Not tested":</b> the MLP, CNN and BiLSTM were left out of the test on purpose, to limit the number of chances for a lucky winner.
+The MLP would also have needed ESM representations that were never computed for the test genes.</li>
+</ul>
+
+<h3>The S-curve (Figure 21 in Part I)</h3>
+<ul>
+<li><b>How it works:</b> the model adds up the 42 standardised features with learned weights (the x-axis, z) and passes the sum through an
+S-shaped curve to give P(benign).</li>
+<li><b>What the dots show:</b> test variants spread along the whole curve, so the model makes confident calls in both directions.</li>
+<li><b>What it doesn't show:</b> it does not compare against ESM; the ROC panel does that.</li>
+<li><b>Hidden dots:</b> many pathogenic test variants, mostly in RYR1, sit at the top right, hidden under the blue dots. This is the
+calibration issue in section 16.</li>
+</ul>
+
+<h3>The ROC curves</h3>
+<ul>
+<li><b>Axes:</b> the y-axis is the share of benign variants called benign; the x-axis is the share of pathogenic variants wrongly called
+benign. A perfect model hugs the top-left corner.</li>
+<li><b>Curves:</b> the model (blue, 0.89) sits above tolerance alone (orange, 0.83) and well above ESM-1v alone (grey, 0.62).</li>
+</ul>
+
+<p><b>Not on the poster, but have it ready:</b> the pre-registered questions, each passing only if the whole 95% range of the difference
+is above 0.</p>
+<table>
+<tr><th>Question</th><th class="num">Difference in AUROC</th><th class="num">95% range</th><th>Verdict</th></tr>
+<tr><td>Model beats ESM-1v on all variants (0.890 vs 0.620)</td><td class="num">+0.27</td><td class="num">+0.05 to +0.45</td><td><b>pass</b></td></tr>
+<tr><td>Model beats ESM-1v where ESM is unsure (0.879 vs 0.545)</td><td class="num">+0.34</td><td class="num">+0.18 to +0.47</td><td><b>pass</b></td></tr>
+<tr><td>ESM + tolerance beats ESM alone (0.826 vs 0.620)</td><td class="num">+0.21</td><td class="num">+0.02 to +0.30</td><td><b>pass</b></td></tr>
+<tr><td>Model beats ESM-1v within genes (only 8 genes testable)</td><td class="num">+0.16</td><td class="num">−0.001 to +0.32</td><td>not shown</td></tr>
+</table>
+
+<!-- ============================================================ 15 -->
+<h2>15. Presenting it</h2>
+<h3>The 30-second version</h3>
+<div class="box grey">"Telling harmful missense variants from harmless ones is hard. Models like ESM learn from evolution, but they
+can't see constraint that's specific to humans. I built a per-residue tolerance score from human data: where healthy people carry
+variants, minus where clinical variants cluster. I combined it with ESM and protein-structure features in a simple logistic regression.
+On 85 postsynaptic genes the model had never seen, it reached an AUROC of 0.89, against 0.62 for ESM alone. The biggest gain was where
+ESM was unsure: 0.88 vs 0.55."</div>
+
+<h3>The 3-minute walk-through (point at each panel as you go)</h3>
+<ol>
+<li><b>Flowchart:</b> "We each carry thousands of protein-changing variants. Most are missense, most of those are harmless, and the
+harmful ones are hard to predict."</li>
+<li><b>ESM:</b> "Protein language models like ESM learn which amino acids evolution allows. They separate pathogenic variants from
+population variants well, but they score variants of uncertain significance just like healthy ones."</li>
+<li><b>Phylogeny and synapse:</b> "Postsynaptic proteins are highly conserved and are where many neurodevelopmental-disorder mutations
+converge, so they are a good test bed for human-specific information."</li>
+<li><b>Tolerance score:</b> "For every residue I compare where healthy people carry variants with where clinical variants cluster. Each
+variant is weighted by how drastic it is. The window is wide in folded regions and narrow in disordered ones."</li>
+<li><b>Histograms:</b> "Built from 90% of the data, the score separates the held-out ClinVar variants, mostly VUS, from gnomAD variants.
+ESM can't."</li>
+<li><b>Structure (GLRA1):</b> "I add structural context: disorder, burial, interfaces, domains and motifs. In the glycine receptor,
+glycine binds between subunits. Interface and ligand-binding residues are as constrained as the core, while the rest of the surface is
+tolerant."</li>
+<li><b>Encoded features:</b> "Everything is lined up per residue and becomes 42 numbers per variant. A variant's own residue is hidden
+when its human-variant features are computed."</li>
+<li><b>Results:</b> "Of eight models, a simple logistic regression did as well as any. I fixed it, and the comparisons, before testing on
+85 untouched genes. It reached 0.89 against ESM's 0.62, and 0.88 against 0.55 where ESM was unsure."</li>
+<li><b>Close:</b> "So human population variation adds information that evolution alone misses. The next step is to test whether it
+picks out VUS that later turn out to be pathogenic."</li>
+</ol>
+
+<div class="box key"><span class="label">Take-home message</span>
+Human population variation, combined with protein structure, adds information that evolution-based prediction misses. On untouched
+postsynaptic genes it lifted AUROC from 0.62 to 0.89, and most where ESM was uncertain.</div>
+
+<!-- ============================================================ 16 -->
+<h2>16. Questions to expect</h2>
+
+<h3>About the idea</h3>
+<div class="qa"><b>What exactly does the model predict?</b> For each variant (one amino-acid change at one position), the probability that
+it would be classified benign rather than pathogenic. It is trained on ClinVar labels. It does not output the tolerance score: tolerance is
+one of its 42 inputs.</div>
+<div class="qa"><b>How is your tolerance score different from existing constraint scores?</b> Scores such as the missense tolerance ratio
+or regional missense constraint use population variation only, comparing what is seen in gnomAD with what would be expected. This score
+differs in three ways:
+<ul style="margin:2pt 0 0 0">
+<li>it subtracts the density of clinically reported variants;</li>
+<li>it weights each variant by how drastic the swap is;</li>
+<li>it adapts the window to structured vs disordered regions.</li>
+</ul>
+A head-to-head comparison with those scores hasn't been done yet.</div>
+<div class="qa"><b>How does it compare with AlphaMissense, REVEL or CADD?</b> Not compared yet. ESM-1v was the planned baseline because it
+is the evolution-only starting point the hypothesis is about. Several of those tools were trained or calibrated with clinical or
+population labels, so a fair comparison has to remove overlapping variants. It's a natural next step.</div>
+<div class="qa"><b>Why postsynaptic proteins?</b> They are highly conserved, densely annotated (SynGO, 1,080 genes) and central to
+neurodevelopmental disorders, with many variants still unclassified. The method itself isn't specific to them.</div>
+
+<h3>About the data</h3>
+<div class="qa"><b>Isn't it circular to use ClinVar both in the features and as the label?</b> That's the main risk, and there are three
+safeguards:
+<ul style="margin:2pt 0 0 0">
+<li><b>Residue hiding:</b> a variant's own residue is hidden when its human-variant features are built.</li>
+<li><b>Gene-family splits:</b> related genes are always kept in the same split.</li>
+<li><b>Untouched test genes:</b> the final test used 85 genes that played no part in any choice, with the plan fixed beforehand.</li>
+</ul>
+What remains is that ClinVar density partly reflects where labs look, which is why the results are presented as a ranking and the VUS
+question is still open.</div>
+<div class="qa"><b>Which variants were used?</b>
+<ul style="margin:2pt 0 0 0">
+<li><b>Labels:</b> missense variants rated pathogenic/likely pathogenic or benign/likely benign in ClinVar, with at least one review
+star.</li>
+<li><b>Tolerance score:</b> all ClinVar missense entries (VUS included) on the ClinVar side, and gnomAD v4.1 missense variants with an
+allele count of at least 2 on the other. On chrX, a gnomAD variant counts only if a male or a homozygous female carries it.</li>
+<li><b>Not used:</b> allele frequency itself is not a feature.</li>
+</ul></div>
+<div class="qa"><b>Where do the structures come from?</b> For each protein, the best-covering experimental structure via PDBe, mapped to
+the MANE sequence. Where there's none, the AlphaFold model is used, with low-confidence residues (pLDDT &lt; 70) left blank. Interfaces
+come from PDBe-KB, which pools contacts across all PDB entries.</div>
+<div class="qa"><b>Why two window sizes and two substitution tables?</b> In folded regions, residues that are far apart in sequence pack
+together in 3D, so constraint spreads along the chain. That calls for a wide window and BLOSUM62, which reflects the swaps evolution
+allows in folded proteins. In disordered regions, function sits in short motifs, so the window is narrow and severity is a plain chemical
+distance (Grantham).</div>
+<div class="qa"><b>Could ancestry bias in gnomAD matter?</b> Yes. gnomAD over-represents European ancestry, so variants that are common in
+under-represented populations can be missed, and regions can look less tolerant than they are. That's a real limitation.</div>
+
+<h3>About the model</h3>
+<div class="qa"><b>Why logistic regression and not deep learning?</b> In cross-validation, logistic regression (0.961) matched or beat
+gradient-boosted trees (0.958), an MLP (0.959), a BiLSTM (0.950) and a CNN (0.943). When a simple model does as well, the limit is the
+information in the data. The simple model is also easier to check and to interpret.</div>
+<div class="qa"><b>What does the model rely on?</b> Its largest weights, per standard deviation of each feature:
+<ul style="margin:2pt 0 0 0">
+<li>ESM-1v LLR: +1.53 (towards benign);</li>
+<li>gnomAD variants within ±15 residues: +1.07;</li>
+<li>ClinVar variants within ±15 residues: −0.99 (towards pathogenic);</li>
+<li>then conservation (−0.90), interfaces (−0.49), exposure (+0.44) and swap severity (−0.40).</li>
+</ul>
+The tolerance score itself gets +0.29, because the raw counts carry the same information and share the credit.</div>
+<div class="qa"><b>Does structure add anything beyond ESM?</b> Yes. In cross-validation, adding each group to ESM's scores improved the
+AUROC:
+<ul style="margin:2pt 0 0 0">
+<li>structure: +0.036;</li>
+<li>disorder and conservation: +0.040;</li>
+<li>human variants nearby: +0.029.</li>
+</ul>
+All three gains are clearly above zero. They overlap because all three mark constrained regions.</div>
+
+<h3>About the results</h3>
+<div class="qa"><b>ESM-1v usually scores around 0.9. Why only 0.62 here?</b> The test set is dominated by three genes: RYR1, ABL1 and VHL
+hold 52% of its variants. ESM gives pathogenic variants in RYR1 and VHL mild scores. In the other 82 test genes ESM-1v scores 0.91 and the
+model 0.96, the same gap as in cross-validation (0.906 vs 0.961).</div>
+<div class="qa"><b>Is the improvement statistically significant?</b> Yes, for the three main questions, with 95% ranges from resampling
+whole genes:
+<ul style="margin:2pt 0 0 0">
+<li>all variants: +0.27 (+0.05 to +0.45);</li>
+<li>where ESM is unsure: +0.34 (+0.18 to +0.47);</li>
+<li>ESM + tolerance vs ESM alone: +0.21 (+0.02 to +0.30).</li>
+</ul>
+The within-gene comparison (+0.16) wasn't significant, because only 8 test genes had enough variants of both kinds.</div>
+<div class="qa"><b>What does "pre-registered" mean here?</b> Before the test genes were scored, the plan was saved with a fingerprint
+(<code>9d090042fbe2</code>): the primary model, the comparisons and the pass criteria. It was then run once. It's an internal registration,
+not a public registry, so say "fixed in advance" if asked.</div>
+<div class="qa"><b>Are the probabilities reliable?</b> Not yet. At P(benign) ≥ 0.5, 97% of benign test variants were classified correctly
+but only 52% of pathogenic ones, mostly because of RYR1. Read the output as a ranking within a gene, or recalibrate it.</div>
+
+<h3>Limits and next steps</h3>
+<div class="qa"><b>Can it find which VUS are pathogenic?</b> Not measured yet. The test used confidently classified variants, which are
+the clearer cases, so expect lower performance on VUS. The cleanest test is a time split: take a ClinVar release from a few years ago,
+rebuild the features from it, and check whether VUS that were later reclassified as pathogenic ranked higher than those later called
+benign. Lab-measured effects (deep mutational scans in MaveDB) and de novo variants in patients are other options.</div>
+<div class="qa"><b>What about genes with few known variants?</b> The human-variant features need variants nearby. Where few have been seen,
+those features carry little information and the model leans on ESM and structure.</div>
+<div class="qa"><b>What's next?</b>
+<ol style="margin:2pt 0 0 0">
+<li>The VUS time-split test.</li>
+<li>Calibration.</li>
+<li>A comparison with AlphaMissense and other tools.</li>
+<li>Scoring all 19 possible swaps at every residue to turn the model into a per-residue predicted tolerance.</li>
+<li>Your original design: predicting tolerance from sequence, with the cleaner pathogenic-only target (section 9).</li>
+</ol></div>
+<div class="qa"><b>Phylogeny: why is regulatory DNA so poorly conserved?</b> Regulatory elements turn over quickly in evolution, and
+most elements in the Regulatory Build aren't deeply conserved. Bases that don't align count as not identical, so many elements score near 0
+outside mammals. Coding DNA is far more conserved, and protein more again, because many DNA changes don't alter the amino acid.</div>
+
+<!-- ============================================================ 17 -->
+<h2>17. Before you present: a checklist</h2>
+<p>These come from reading the exported poster closely. The first three are worth fixing before printing if there's still time; the
+rest are things to be ready for.</p>
+<table>
+<tr><th style="width:4%">#</th><th style="width:32%">What</th><th>Details and suggestion</th></tr>
+<tr><td>1</td><td><b>The QR code points to a different repository</b></td><td>It opens
+<code>github.com/AlexanderWLehr/Lehr-etal-Gene-2024</code>, an earlier project. This project's repository,
+<code>github.com/tLex36/LehrPDI-tolerance-model</code>, is <b>private</b>, so visitors couldn't open it anyway. If you want people to
+reach this work, make that repository public (<code>gh repo edit tLex36/LehrPDI-tolerance-model --visibility public
+--accept-visibility-change-consequences</code>) and replace the QR code. Otherwise, be ready to say what the QR code links to.</td></tr>
+<tr><td>2</td><td>Flowchart numbers</td><td>"~2 million variants" and "~500 missense variants" have no source and are lower than the
+1000 Genomes figures (4.1–5.0 million sites; 10,000–12,000 peptide-altering). See section 12.</td></tr>
+<tr><td>3</td><td>Heading and caption of the histogram panel</td><td>"Tolerance scores distinguish<b>es</b>" should be "distinguish". The
+first line of the caption below the histograms is partly hidden behind the figure.</td></tr>
+<tr><td>4</td><td>"Unannotated variants"</td><td>The ClinVar group is every held-out ClinVar entry, mostly VUS. Consider "ClinVar
+variants (mostly VUS)", or be ready to explain (section 13).</td></tr>
+<tr><td>5</td><td>Citations</td><td>Reference 18 (Lehr et al., 2025) has no superscript anywhere on the poster, and the pedigree under
+the GWAS plot has no source. If the pedigree comes from reference 18, adding ¹⁸ under it fixes both. Also confirm that the synapse
+diagram is credited as you intend ("Bemben et al., 2015" vs "adapted from").</td></tr>
+<tr><td>6</td><td>The phylogeny has no caption</td><td>Be ready to explain the bold number (median % similarity), the small % (share of
+genes with an orthologue) and the hatching (too few orthologues, or no genome alignment).</td></tr>
+<tr><td>7</td><td>ESM-1b vs ESM-1v</td><td>The histogram from Brandes et al. uses ESM-1b; your model and baseline use ESM-1v.</td></tr>
+<tr><td>8</td><td>Gβγ motif in GLRA1</td><td>Only if you mention it: check Yevenes et al. (2008) first.</td></tr>
+<tr><td>9</td><td>Rows missing from the database table</td><td>The poster's version of the table leaves out the MobiDB and UniProt
+rows (references 12 and 13), although MobiDB also labels the binding tracks above it. If asked: MobiDB adds curated and predicted disorder
+and binding regions (LIPs); UniProt adds known sites (ligand binding, transmembrane segments, modifications).</td></tr>
+</table>
+
+<!-- ============================================================ 18 -->
+<h2>18. Glossary</h2>
 <table>
 <tr><th style="width:22%">Term</th><th>Meaning</th></tr>
+<tr><td>AIUPred</td><td>a predictor of disordered (unstructured) protein regions and of disordered binding sites, from sequence alone</td></tr>
+<tr><td>AlphaFold</td><td>a model that predicts protein structures; its database has a predicted structure for every human protein</td></tr>
 <tr><td>AUROC</td><td>the chance that a random benign variant gets a more benign score than a random pathogenic one. 0.5 = chance, 1 = perfect</td></tr>
 <tr><td>BLOSUM62, Grantham</td><td>tables of how different two amino acids are (evolutionary substitution rates; chemical distance)</td></tr>
 <tr><td>Bootstrap, 95% range</td><td>resampling the genes with replacement many times and keeping the middle 95% of the recomputed results</td></tr>
 <tr><td>Calibration, Brier score</td><td>whether stated probabilities match observed frequencies; the Brier score is their mean squared error (0 = perfect)</td></tr>
 <tr><td>Centring</td><td>subtracting each gene's median tolerance, so each track is measured from its own typical level</td></tr>
 <tr><td>Cluster</td><td>a group of related genes (similar sequence or same PANTHER family), always kept in the same split</td></tr>
+<tr><td>Cohen's d</td><td>the difference between two means in units of their standard deviation; 0.8 or more is usually called large</td></tr>
 <tr><td>Cross-validation</td><td>fitting on 4/5 of the data and scoring the other 1/5, rotating, so every item is scored by a model that never saw it</td></tr>
 <tr><td>Early stopping</td><td>ending training when the score on set-aside data stops improving</td></tr>
 <tr><td>Epoch</td><td>one pass over all the training data</td></tr>
@@ -636,16 +1174,23 @@ built from a model whose accuracy has been checked on genes nobody chose.</div>
 <tr><td>Feature, input</td><td>a number the model is allowed to look at</td></tr>
 <tr><td>Fine-tuning, LoRA</td><td>continuing to train a pre-trained model on a new task; LoRA trains small add-on matrices instead of all its weights</td></tr>
 <tr><td>Frozen</td><td>a pre-trained model whose weights are kept fixed while something on top of it is trained</td></tr>
+<tr><td>Identity, similarity</td><td>identity counts identical amino acids (or bases); similarity also counts conservative swaps (positive BLOSUM62 score)</td></tr>
+<tr><td>Interface residue</td><td>an exposed residue that touches another protein chain in an experimental structure (here from PDBe-KB)</td></tr>
+<tr><td>KS statistic (D)</td><td>the largest vertical gap between two cumulative distributions: 0 = identical, 1 = no overlap</td></tr>
 <tr><td>LLR</td><td>log-likelihood ratio: log P(new amino acid) − log P(original), from ESM. Negative = unexpected swap</td></tr>
 <tr><td>Logistic regression</td><td>a weighted sum of features passed through an S-shaped curve to give a probability</td></tr>
 <tr><td>Loss</td><td>a number measuring how far the model's output is from the target; training makes it smaller</td></tr>
+<tr><td>MANE</td><td>one agreed reference transcript per protein-coding gene (NCBI and Ensembl); all residue numbers here use it</td></tr>
 <tr><td>Noise ceiling</td><td>the highest correlation any model could reach with a noisy target</td></tr>
+<tr><td>Orthologue</td><td>the same gene in another species, descended from one ancestral gene</td></tr>
 <tr><td>Overfitting</td><td>memorising the training data instead of learning rules that carry over to new data</td></tr>
 <tr><td>pLDDT</td><td>AlphaFold's confidence in its structure model at a residue (0–100)</td></tr>
+<tr><td>Pre-registration</td><td>fixing the analysis plan (models, comparisons, pass criteria) before seeing the test data</td></tr>
 <tr><td>Representation</td><td>ESM's internal description of a residue: 1,280 numbers summarising its context</td></tr>
 <tr><td>Residue hiding</td><td>building a variant's human-variant features without any variant at its own residue</td></tr>
 <tr><td>RSA</td><td>relative solvent accessibility: the share of a residue's surface exposed to water</td></tr>
 <tr><td>Spearman correlation</td><td>agreement between two rankings: +1 same order, 0 unrelated, −1 reversed</td></tr>
+<tr><td>SynGO</td><td>an expert-curated database of synapse genes; the source of the 1,080 postsynaptic genes</td></tr>
 <tr><td>Target</td><td>the answer a model learns to produce</td></tr>
 <tr><td>Validation / test set</td><td>genes held out from training: validation for choosing between models, test for one final check</td></tr>
 <tr><td>VUS</td><td>variant of uncertain significance: a ClinVar entry with no pathogenic or benign call</td></tr>

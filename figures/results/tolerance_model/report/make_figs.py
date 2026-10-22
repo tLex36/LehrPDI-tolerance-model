@@ -163,7 +163,7 @@ ax.vlines(x[gn_cnt > 0], 0, gn_cnt[gn_cnt > 0], color=BLUE, lw=1.1)
 ax.vlines(x[cv_cnt > 0], 0, -cv_cnt[cv_cnt > 0], color=RED, lw=1.1)
 ax.axhline(0, color=MUTED, lw=0.8); ax.set_ylim(-cv_cnt.max() - 1.5, gn_cnt.max() + 3.5)
 ax.set_ylabel("variants\nper residue")
-ax.legend(handles=[Line2D([], [], color=BLUE, lw=2, label=f"gnomAD (up): {len(gn)} variants seen in ≥ 2 people of the healthy population"),
+ax.legend(handles=[Line2D([], [], color=BLUE, lw=2, label=f"gnomAD (up): {len(gn)} variants seen at least twice in the healthy population (allele count ≥ 2)"),
                    Line2D([], [], color=RED, lw=2, label=f"ClinVar (down): {len(cv)} variants reported to the clinical database, any classification")],
           frameon=True, framealpha=0.95, edgecolor="white", fontsize=8.4, loc="upper left", ncol=1)
 ax.set_title(f"Step 1. Where the missense variants are in {GENE} ({L} residues)", loc="left")
