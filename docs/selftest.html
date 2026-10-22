@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorer Self-Check</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main id="main" style="padding-top:24px">
+  <p class="kicker"><a href="index.html">← Back to the explorer</a></p>
+  <h2>Check the browser recipe against the official scores</h2>
+  <p>This page rebuilds the tolerance score of every gene in your browser, with the official recipe
+    (<code>assets/tolerance.js</code>), and compares it with a fingerprint of the official <code>tolerance_v4</code> values
+    stored with each gene (the sum and the sum of absolute values over all residues). It also recomputes the test-set AUROCs
+    from the official predictions.</p>
+  <div class="card">
+    <p class="status-line" id="progress">Starting…</p>
+    <div class="table-scroll" id="result"></div>
+  </div>
+</main>
+<script src="assets/tolerance.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+(async function () {
+  const { el, fmt } = TOL.ui, R = TOL.recipe, S = TOL.stats;
+  const progress = document.getElementById("progress"), out = document.getElementById("result");
+  const rows = [];
+  // 1. every gene
+  const idx = await TOL.data.index();
+  let done = 0, worst = 0, bad = [];
+  const queue = idx.list.map((g) => g.gene);
+  async function worker() {
+    while (queue.length) {
+      const name = queue.shift();
+      const d = await TOL.data.gene(name);
+      const gn = d.gnomad.filter((v) => v.flag === "u"), cv = d.clinvar;
+      const t = R.tolerance(gn, cv, d.dis).tol;
+      let sum = 0, sa = 0;
+      for (const v of t) { sum += v; sa += Math.abs(v); }
+      const diff = Math.max(Math.abs(sum - d.check[0]), Math.abs(sa - d.check[1]));
+      worst = Math.max(worst, diff);
+      if (diff > 1e-4) bad.push(`${name} (${diff.toExponential(1)})`);
+      done++;
+      if (done % 25 === 0) progress.textContent = `Rebuilt ${done} of ${idx.list.length} genes…`;
+    }
+  }
+  await Promise.all(Array.from({ length: 6 }, worker));
+  rows.push(["Genes rebuilt", String(done)], ["Genes matching the official fingerprint", `${done - bad.length} of ${done}`],
+            ["Largest difference in a fingerprint", worst.toExponential(2)]);
+  if (bad.length) rows.push(["Mismatches", bad.slice(0, 20).join(", ")]);
+  // 2. the test-set AUROCs
+  const test = await TOL.data.test(), list = test.list, res = test.results.scores;
+  const KEYS = { model: "logistic: all features", esm: "ESM-1v LLR", tolerance: "tolerance (own residue hidden)",
+                 esm_tolerance: "logistic: ESM LLR + tolerance", trees: "gradient-boosted trees: all features" };
+  for (const [k, name] of Object.entries(KEYS)) {
+    const a = S.auroc(list.filter((r) => r.benign).map((r) => r[k]), list.filter((r) => !r.benign).map((r) => r[k]));
+    const u = list.filter((r) => r.esm > test.esm_unsure_threshold);
+    const b = S.auroc(u.filter((r) => r.benign).map((r) => r[k]), u.filter((r) => !r.benign).map((r) => r[k]));
+    rows.push([`Test AUROC, ${name}`, `${fmt.f(a, 4)} (official ${fmt.f(res[name].AUROC, 4)}); where ESM is unsure ${fmt.f(b, 4)} (official ${fmt.f(res[name]["AUROC where ESM is unsure"], 4)})`]);
+  }
+  out.replaceChildren(el("table", { class: "data-table" }, el("tbody", {}, rows.map(([a, b]) => el("tr", {}, el("th", { scope: "row", text: a }), el("td", { text: b }))))));
+  const ok = !bad.length;
+  progress.replaceChildren(ok ? el("span", { class: "ok", text: `✓ All ${done} genes match the official scores.` })
+                              : el("strong", { text: `${bad.length} genes differ from the official scores.` }));
+  document.documentElement.setAttribute("data-selftest", ok ? "pass" : "fail");
+  document.documentElement.setAttribute("data-selftest-worst", String(worst));
+})().catch((e) => { document.getElementById("progress").textContent = "Error: " + e.message; document.documentElement.setAttribute("data-selftest", "error: " + e.message); });
+</script>
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tolerance Score Explorer</title>
+<meta name="description" content="An interactive guide to the data and experiments behind a per-residue tolerance score and a missense pathogenicity model for postsynaptic proteins.">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M5 20c4 0 4-9 8-9s4 13 8 13 4-8 6-8' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Interactive companion to the poster · JHU Building Bridges · 23 October 2026</p>
+    <h1>Human variant tolerance and protein structure sharpen missense pathogenicity prediction in postsynaptic proteins</h1>
+    <p class="lede">Explore the data and the experiments behind the poster: how a per-residue <strong>tolerance score</strong> is
+      built from human variation, what each protein looks like through it, and how a simple model that combines it with
+      evolution (ESM-1v) and protein structure was tested on genes it had never seen.</p>
+    <div class="tiles" id="tiles">
+      <div class="tile"><p class="label">Proteins studied</p><p class="value">1,082</p><p class="sub">postsynaptic (SynGO), MANE Select</p></div>
+      <div class="tile"><p class="label">Missense variants</p><p class="value">1.15M</p><p class="sub">gnomAD v4.1 and ClinVar</p></div>
+      <div class="tile"><p class="label">Features per variant</p><p class="value">42</p><p class="sub">evolution, human variation, structure, annotations</p></div>
+      <div class="tile"><p class="label">AUROC on 85 untouched genes</p><p class="value">0.89 <small>vs 0.62</small></p><p class="sub">model vs ESM-1v alone</p></div>
+    </div>
+    <div class="hero-links">
+      <a href="https://github.com/tLex36/LehrPDI-tolerance-model">Code and notebooks on GitHub</a>
+      <a href="https://github.com/tLex36/LehrPDI-tolerance-model/blob/main/figures/results/tolerance_model/report/model_training_explained.pdf">The full written guide (PDF)</a>
+      <span class="note">Alexander W. Lehr, Katherine W. Roche · NINDS, NIH and Brown University</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <div class="inner">
+    <ol>
+      <li><a href="#question">The question</a></li>
+      <li><a href="#data">The data</a></li>
+      <li><a href="#explorer">Explore a gene</a></li>
+      <li><a href="#heldout">1 · Held-out variants</a></li>
+      <li><a href="#structure">2 · Structure</a></li>
+      <li><a href="#models">3 · Choosing a model</a></li>
+      <li><a href="#test">4 · Untouched genes</a></li>
+      <li><a href="#inside">Inside the model</a></li>
+      <li><a href="#design-a">Design A</a></li>
+      <li><a href="#conservation">Conservation</a></li>
+      <li><a href="#limits">Limits</a></li>
+    </ol>
+    <button class="btn small theme-btn" id="theme-btn" type="button" aria-label="Switch between light and dark">Dark</button>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ====================================================================== the question -->
+<section id="question">
+  <p class="kicker">The question</p>
+  <h2>Can human variation add what evolution misses?</h2>
+  <p>Each of us carries thousands of variants that change one amino acid in a protein (missense variants). Most are harmless,
+    and the damaging ones are hard to recognise. Protein language models such as <strong>ESM-1v</strong> learn from millions of
+    natural protein sequences which amino acids evolution allows at each position, and they already separate many pathogenic
+    variants from those seen in healthy people.</p>
+  <p>This project asks whether two more kinds of evidence help:</p>
+  <ul class="prose">
+    <li><strong>Human population variation:</strong> where healthy people carry variants (gnomAD) and where clinically
+      reported variants cluster (ClinVar), turned into a per-residue tolerance score.</li>
+    <li><strong>Protein structure:</strong> whether a residue is buried or exposed, folded or disordered, at an interface or in a
+      known domain or motif.</li>
+  </ul>
+  <div class="grid-2">
+    <div class="callout key"><strong>Design A (the original goal)</strong>
+      <p>A model that predicts the tolerance score from the protein sequence, so the prediction becomes the tolerance score.
+        It was built and tried, but its target turned out to be too noisy residue by residue. See <a href="#design-a">Design A</a>.</p></div>
+    <div class="callout plain"><strong>Design B (what the poster tests)</strong>
+      <p>A model that predicts each variant's ClinVar label (pathogenic or benign). The tolerance score is one of its 42 inputs.
+        It was chosen by cross-validation and tested once on untouched genes. See experiments <a href="#models">3</a> and
+        <a href="#test">4</a>.</p></div>
+  </div>
+</section>
+
+<!-- ====================================================================== the data -->
+<section id="data">
+  <p class="kicker">The data</p>
+  <h2>From public databases to one row per variant</h2>
+  <p>Everything starts from public data. Each source contributes one or more pieces: the tolerance score, the model's
+    features, the labels the model learns from, or context. Click a step to jump to where it is explored.</p>
+  <div class="pipeline" id="pipeline"></div>
+
+  <h3>Where each piece comes from</h3>
+  <div class="controls">
+    <div class="control"><span>Show the sources that feed</span><div class="chips" id="source-filter"></div></div>
+  </div>
+  <div class="sources" id="sources"></div>
+
+  <h3>How the genes were split</h3>
+  <p>Models are judged on genes they were not trained on. Genes are split by family: genes with at least 40% sequence identity or
+    from the same PANTHER family always land in the same split, so a model can't score a test gene by recognising a close
+    relative from training. The validation genes were used to compare and choose models; the test genes were used once, at the
+    end.</p>
+  <div class="card" id="split-card">
+    <p class="fig-title">Genes, residues and labelled variants in each split</p>
+    <p class="fig-sub">Labelled = ClinVar pathogenic / likely pathogenic or benign / likely benign with at least one review star.
+      12 genes without a usable tolerance score were left out of the split.</p>
+    <div class="chart" id="split-chart"></div>
+  </div>
+</section>
+
+<!-- ====================================================================== gene explorer -->
+<section id="explorer">
+  <p class="kicker">Explore a gene</p>
+  <h2>The tolerance score, residue by residue</h2>
+  <p>Pick any of the 1,082 proteins. The top tracks show the raw evidence (variants) and how it becomes the tolerance score; the
+    lower tracks show what the model is told about each residue. Hover for the values at a residue; drag across the overview strip
+    to zoom. The page rebuilds the score in your browser from the variants, so you can change the recipe and see what moves.</p>
+  <div class="card" id="explorer-card">
+    <div class="controls">
+      <div class="control"><label for="gene-input">Gene</label>
+        <input id="gene-input" type="search" list="gene-list" autocomplete="off" spellcheck="false" placeholder="e.g. GLRA1">
+        <datalist id="gene-list"></datalist></div>
+      <div class="control"><span>Examples</span><div class="chips" id="gene-examples"></div></div>
+    </div>
+    <div class="gene-head" id="gene-head"></div>
+    <div class="legend" id="explorer-legend"></div>
+    <div class="chart" id="explorer-chart" aria-label="Tracks along the selected protein"></div>
+    <div class="recipe" id="recipe">
+      <p class="fig-title">Change the recipe</p>
+      <p class="fig-sub">The official recipe (notebook 05, §3): each variant is weighted by how drastic its swap is (BLOSUM62 where
+        the residue is folded, Grantham distance where it is disordered), the most severe swap at a residue counts, the weights are
+        smoothed with a binomial window (w = 31 in folded, w = 5 in disordered regions; the window spans 2w + 1 residues), both
+        densities are scaled 0–1 within the gene, and tolerance = gnomAD − ClinVar.</p>
+      <div class="controls" id="recipe-controls"></div>
+      <p class="status-line" id="recipe-status"></p>
+    </div>
+    <div class="variant-panel" id="variant-panel"></div>
+  </div>
+</section>
+
+<!-- ====================================================================== experiment 1 -->
+<section id="heldout">
+  <p class="kicker">Experiment 1</p>
+  <h2>Does the tolerance score recognise variants it has never seen?</h2>
+  <p>10% of all variants (62,942) were set aside. The tolerance score was rebuilt from the other 90% and read off at each held-out
+    variant (62,884 of them, in 1,069 genes with a usable score). If the score captures real constraint, held-out pathogenic variants should fall in low-tolerance regions and
+    gnomAD variants in high ones. ESM-1v's score of the same variants is shown for comparison.</p>
+  <div class="card" id="heldout-card">
+    <div class="controls" id="heldout-controls"></div>
+    <div class="chart" id="heldout-chart"></div>
+    <p class="status-line" id="heldout-readout"></p>
+  </div>
+  <div class="callout warn"><strong>Read with care</strong>
+    <p>The ClinVar side of the tolerance score counts every ClinVar entry, VUS included. A held-out variant was not counted
+      itself, but its ClinVar neighbours were, and clinical labs submit many variants from the same genes and regions. So part of
+      the gap between ClinVar and gnomAD variants is built in. The cleanest comparison is pathogenic vs gnomAD (AUROC 0.90 for
+      tolerance vs 0.80 for ESM-1v), and the strongest test is experiment 4, on genes never used at all.</p>
+    <p>"As on the poster" uses the poster panel's subset: held-out variants found in one database only, at residues where another
+      substitution was observed.</p>
+  </div>
+</section>
+
+<!-- ====================================================================== experiment 2 -->
+<section id="structure">
+  <p class="kicker">Experiment 2</p>
+  <h2>Where in the structure are pathogenic variants?</h2>
+  <p>Each residue gets a structural class from its relative solvent accessibility (RSA, the share of its surface exposed to water)
+    in the best experimental structure, or in the AlphaFold model when there is none: <strong>core</strong> (RSA &lt; 0.2),
+    <strong>boundary</strong> (0.2–0.4) or <strong>surface</strong> (&gt; 0.4). Exposed residues that touch another protein chain in any
+    PDB entry (PDBe-KB) are <strong>interface</strong> residues.</p>
+  <div class="card">
+    <p class="fig-title">Share of held-out ClinVar variants that are pathogenic, by structural class</p>
+    <p class="fig-sub">Held-out pathogenic and benign variants (at least one review star) in all genes, pooled. Ligand-binding residues
+      (PDBe-KB and UniProt) overlap the other classes.</p>
+    <div class="chart" id="struct-chart"></div>
+  </div>
+  <p>Exposed residues tolerate change, unless they form an interface or bind a ligand: then they are as constrained as the core.
+    This is why the model gets structure and interface features, and why the tolerance score uses a wider window where a protein is
+    folded (neighbours in the fold share constraint) than where it is disordered (function sits in short motifs).</p>
+</section>
+
+<!-- ====================================================================== experiment 3 -->
+<section id="models">
+  <p class="kicker">Experiment 3</p>
+  <h2>Choosing a model by cross-validation</h2>
+  <p>Eight ways to predict the ClinVar label were compared on the 15,339 labelled variants of the training and validation genes
+    (5,449 pathogenic, 9,890 benign), with 5-fold cross-validation that keeps gene families together. Every human-variant feature
+    was rebuilt with the variant's own residue hidden. A simple logistic regression on the 42 features did as well as any neural
+    network, so it was fixed in advance as the one model to test on the untouched genes.</p>
+  <div class="card" id="cv-card">
+    <div class="controls" id="cv-controls"></div>
+    <div class="chart" id="cv-chart"></div>
+  </div>
+  <h3>What each kind of data adds</h3>
+  <p>Gradient-boosted trees were refitted on each feature group alone, and with each group added to the ESM scores.</p>
+  <div class="card" id="groups-card">
+    <div class="controls" id="groups-controls"></div>
+    <div class="chart" id="groups-chart"></div>
+    <p class="note">Bars: AUROC in cross-validation; whiskers: 95% range from resampling genes. The groups overlap (all three mark
+      constrained regions), so their gains don't add up: all features together reach 0.958, against 0.904 for the ESM scores alone.</p>
+  </div>
+</section>
+
+<!-- ====================================================================== experiment 4 -->
+<section id="test">
+  <p class="kicker">Experiment 4</p>
+  <h2>The test on untouched genes</h2>
+  <p>Before the test genes were scored, the plan was saved with a fingerprint (<code>9d090042fbe2</code>): the model, the comparisons
+    and the pass rule. It then ran once, on 1,357 ClinVar variants (602 pathogenic, 755 benign) in 85 genes that played no part in
+    training or model choice. Use the controls to see how the result depends on the genes included and on where ESM is unsure.</p>
+  <div class="card" id="test-card">
+    <div class="controls" id="test-controls"></div>
+    <div class="grid-2">
+      <div>
+        <p class="fig-title">ROC curves</p>
+        <p class="fig-sub">Each curve sweeps a cut-off from the most benign-looking score down. Higher and further left is better.</p>
+        <div class="legend" id="roc-legend"></div>
+        <div class="chart" id="roc-chart"></div>
+      </div>
+      <div>
+        <p class="fig-title">How the model scores each test variant</p>
+        <p class="fig-sub">The model adds up its 42 weighted features (z) and turns the sum into P(benign). Move the cut-off to see what
+          a decision would catch.</p>
+        <div class="controls" id="cutoff-controls"></div>
+        <div class="chart" id="scurve-chart"></div>
+        <p class="status-line" id="cutoff-readout"></p>
+      </div>
+    </div>
+  </div>
+  <h3>The pre-registered questions</h3>
+  <p>Each question passes only if the whole 95% range of the difference (1,000 resamples of whole genes) is above 0.</p>
+  <div class="card"><div class="table-scroll" id="questions-table"></div></div>
+  <h3>Gene by gene</h3>
+  <p>Within-gene AUROC needs at least 3 pathogenic and 3 benign variants in the gene; only 8 test genes qualify.</p>
+  <div class="card"><div class="table-scroll" id="test-genes-table"></div></div>
+</section>
+
+<!-- ====================================================================== inside the model -->
+<section id="inside">
+  <p class="kicker">Inside the model</p>
+  <h2>What the logistic regression relies on</h2>
+  <p>The final model multiplies each feature, standardised to mean 0 and standard deviation 1, by a weight and adds the results.
+    Positive weights push towards benign, negative towards pathogenic. Correlated features share credit (the raw ClinVar and gnomAD
+    counts carry much of what the tolerance score carries), so read the top of the list as "what the model leans on", not as separate
+    causes.</p>
+  <div class="card" id="weights-card">
+    <div class="controls" id="weights-controls"></div>
+    <div class="chart" id="weights-chart"></div>
+  </div>
+  <h3>One variant, feature by feature</h3>
+  <p>Pick a labelled variant from a training or validation gene to see how its features add up. The model shown is the final one,
+    fitted on all 15,339 training and validation variants, so these variants were part of its training (for honest numbers, see
+    experiments 3 and 4).</p>
+  <div class="card" id="waterfall-card">
+    <div class="controls" id="waterfall-controls"></div>
+    <div class="variant-list" id="waterfall-variants"></div>
+    <div class="chart" id="waterfall-chart"></div>
+  </div>
+</section>
+
+<!-- ====================================================================== design A -->
+<section id="design-a">
+  <p class="kicker">Design A</p>
+  <h2>Why not predict the tolerance score directly?</h2>
+  <p>The original plan was a model whose output is the tolerance score itself, learned from sequence, so it could score residues
+    where no variant has been seen. Models were judged by the within-gene Spearman correlation between predicted and observed
+    tolerance on the validation genes. Built twice from two random halves of the variants, the score agrees with itself only so
+    far, which caps what any model can reach (the noise ceiling).</p>
+  <div class="card">
+    <p class="fig-title">Within-gene Spearman correlation with the tolerance target (validation genes)</p>
+    <div class="chart" id="designa-chart"></div>
+  </div>
+  <div class="card">
+    <p class="fig-title">A cleaner target: count only pathogenic ClinVar variants on the ClinVar side</p>
+    <p class="fig-sub">Try it in the gene explorer: set "ClinVar side" to "pathogenic only".</p>
+    <div class="chart" id="recipe-chart"></div>
+  </div>
+  <p>The target was mostly noise at single residues: the best model reached a third of the ceiling. Counting only pathogenic variants
+    on the ClinVar side makes the target far more reproducible and more learnable, which is the most promising way back to Design A.</p>
+</section>
+
+<!-- ====================================================================== conservation -->
+<section id="conservation">
+  <p class="kicker">Context</p>
+  <h2>How conserved are postsynaptic proteins?</h2>
+  <p>Protein similarity of human genes to their orthologues (identical or conservative amino acids, positive BLOSUM62) and DNA
+    identity in Ensembl's pairwise genome alignments, from chimpanzee to <i>C. elegans</i> (Ensembl 116). This is background for the
+    poster, not a model input.</p>
+  <div class="card">
+    <div class="legend" id="cons-legend"></div>
+    <div class="chart" id="cons-chart"></div>
+    <p class="note">Bold number: median % similarity over genes with an orthologue (protein) or mean % identical bases over 80
+      regions (DNA). Small number: share of genes that have an orthologue. Hatched: fewer than 10% of genes have an orthologue, or
+      Ensembl has no genome alignment for that species. All 86 ribosomal proteins are also in the postsynaptic set (SynGO
+      annotates postsynaptic ribosomes).</p>
+  </div>
+</section>
+
+<!-- ====================================================================== limits -->
+<section id="limits">
+  <p class="kicker">Limits</p>
+  <h2>What these results do not show yet</h2>
+  <ul class="prose">
+    <li><strong>Three genes dominate the test.</strong> RYR1, ABL1 and VHL hold 52% of the test variants, and ESM-1v struggles in
+      RYR1 and VHL. In the other 82 test genes, ESM-1v reaches 0.91 and the model 0.96: the same gap as in cross-validation. Try it in
+      experiment 4.</li>
+    <li><strong>The probabilities are not calibrated.</strong> At P(benign) ≥ 0.5, 97% of benign but only 52% of pathogenic test
+      variants were classified correctly, mostly because of RYR1. Read the output as a ranking.</li>
+    <li><strong>VUS are untested.</strong> The test used confidently classified variants. Whether the model picks out VUS that later
+      turn out pathogenic needs a time-split test on an older ClinVar release.</li>
+    <li><strong>Part of the signal reflects where labs look.</strong> ClinVar density is partly ascertainment; residue hiding,
+      family splits and untouched genes limit, but don't remove, that effect.</li>
+    <li><strong>gnomAD over-represents European ancestry</strong>, so some regions may look less tolerant than they are.</li>
+  </ul>
+</section>
+
+</main>
+
+<footer>
+  <div class="inner">
+    <h3>Glossary</h3>
+    <dl class="glossary">
+      <dt>AUROC</dt><dd>The chance that a random benign variant gets a more benign score than a random pathogenic one. 0.5 is chance, 1 is perfect.</dd>
+      <dt>Tolerance score</dt><dd>Smoothed gnomAD variant density minus smoothed ClinVar variant density, each scaled 0–1 within the gene. Above 0: more healthy variation than clinical reports (tolerated); below 0: intolerant.</dd>
+      <dt>ESM-1v LLR</dt><dd>log P(new amino acid) − log P(original) from the ESM-1v protein language model. Strongly negative means evolution rarely allows the swap.</dd>
+      <dt>VUS</dt><dd>Variant of uncertain significance: a ClinVar entry without a pathogenic or benign call.</dd>
+      <dt>RSA</dt><dd>Relative solvent accessibility: the share of a residue's surface exposed to water (core &lt; 0.2, surface &gt; 0.4).</dd>
+      <dt>pLDDT</dt><dd>AlphaFold's per-residue confidence (0–100); below 70 usually means a disordered region.</dd>
+      <dt>Disorder (AIUPred)</dt><dd>Predicted intrinsic disorder; residues scoring ≥ 0.5 are treated as unstructured.</dd>
+      <dt>Residue hiding</dt><dd>Building a variant's human-variant features without any variant at its own residue, so no variant informs its own score.</dd>
+      <dt>Cross-validation</dt><dd>Fitting on four fifths of the gene families and scoring the fifth, in rotation, so every variant is scored by a model that never saw its gene family.</dd>
+      <dt>Noise ceiling</dt><dd>The highest correlation any model could reach with a noisy target, estimated from how well the target agrees with itself.</dd>
+      <dt>Pre-registration</dt><dd>Fixing the analysis plan before looking at the test data.</dd>
+    </dl>
+    <h3>Data sources</h3>
+    <ol>
+      <li>gnomAD v4.1 (Genome Aggregation Database Consortium, 2024) · ClinVar (Landrum et al., <i>Nucleic Acids Res.</i> 2025) · SynGO (Koopmans et al., <i>Neuron</i> 2019)</li>
+      <li>ESM-1v (Meier et al., <i>NeurIPS</i> 2021) · AIUPred (Erdős &amp; Dosztányi, <i>Nucleic Acids Res.</i> 2024)</li>
+      <li>PDB via PDBe and SIFTS · AlphaFold DB (Varadi et al., <i>Nucleic Acids Res.</i> 2024) · PDBe-KB (<i>Nucleic Acids Res.</i> 2022)</li>
+      <li>InterPro (Blum et al., <i>Nucleic Acids Res.</i> 2025) · UniProt (<i>Nucleic Acids Res.</i> 2025) · MobiDB (Piovesan et al., <i>Nucleic Acids Res.</i> 2023) · ELM (Kumar et al., <i>Nucleic Acids Res.</i> 2024) · Ensembl 116 (Dyer et al., <i>Nucleic Acids Res.</i> 2025)</li>
+    </ol>
+    <h3>About this page</h3>
+    <p>Built from the saved results of notebook 05 by <code>tools/explorer/build_data.py</code> and
+      <code>tools/explorer/build_model_data.py</code>; the tolerance recipe runs in your browser (<code>assets/tolerance.js</code>).
+      <a href="selftest.html">Check it yourself</a>: that page rebuilds the score for all 1,082 genes and compares it with the official
+      values. Results are research findings, not clinical advice.</p>
+  </div>
+</footer>
+
+<script src="assets/tolerance.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/sections/overview.js"></script>
+<script src="assets/sections/explorer.js"></script>
+<script src="assets/sections/experiments.js"></script>
+<script src="assets/sections/test.js"></script>
+<script src="assets/sections/inside.js"></script>
+<script src="assets/sections/conservation.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
