@@ -666,7 +666,7 @@ on VUS. The answers are folded into section 16.</td><td>this guide, sections 8 a
 "honest limits" notes.</td><td><code>poster/svg/</code>, <code>poster/poster_text.md</code>, <code>poster/poster_numbers.json</code></td></tr>
 <tr><td>Conservation across evolution (I0)</td><td>New data from Ensembl 116:
 <ul style="margin:3pt 0 0 0">
-<li><b>Protein:</b> % similarity of human proteins to their orthologues in 17 species, for postsynaptic proteins (1,080 genes),
+<li><b>Protein:</b> % similarity of human proteins to their orthologues in 17 species, for postsynaptic proteins (1,080 genes: the 1,082 in the study minus 2 not matched to Ensembl),
 olfactory receptors (399) and ribosomal proteins (86).</li>
 <li><b>DNA:</b> % identity in genome alignments for 80 regulatory elements and 80 coding regions.</li>
 <li><b>Changes on request:</b> protein numbers switched from identity to similarity, and the whole-genome column replaced by coding regions.</li>
@@ -688,6 +688,10 @@ arrangement of the figures) and exported a PDF. Part II describes that final ver
 <code>tools/poster_layout/</code></td></tr>
 <tr><td>Title</td><td><i>Human Variant Tolerance and Protein Structure Sharpen Missense Pathogenicity Prediction in Postsynaptic
 Proteins</i></td><td>on the poster</td></tr>
+<tr><td>Interactive explorer</td><td>A web page for exploring the data and every experiment: the tolerance score of any protein
+(rebuilt in the browser, with a recipe you can change), the held-out variants, the structural classes, model choice, the untouched-gene
+test and the model's weights. It is ready for GitHub Pages but not yet published.</td><td><code>docs/index.html</code> in the repository;
+will be at <code>tlex36.github.io/LehrPDI-tolerance-model</code></td></tr>
 <tr><td>GitHub repository</td><td>The code, notebooks 05 and 06, poster figures and this guide. It leaves out large data files, credentials,
 HGMD data and third-party published figures.</td><td><code>github.com/tLex36/LehrPDI-tolerance-model</code> (private)</td></tr>
 </table>
@@ -714,11 +718,11 @@ AUROC 0.89 against 0.62 for ESM-1v alone.</td></tr>
 
 <p><b>The title, piece by piece.</b> "Human Variant Tolerance" is the tolerance score; "Protein Structure" is the structural features;
 "Sharpen Missense Pathogenicity Prediction" means improving on ESM-1v alone (0.89 vs 0.62); "in Postsynaptic Proteins" refers to the
-1,080 SynGO genes.</p>
+1,082 SynGO proteins.</p>
 
 <div class="box key"><span class="label">Numbers worth knowing by heart</span>
 <table style="margin:2pt 0 0 0">
-<tr><td style="width:38%">Genes studied</td><td>1,080 postsynaptic (SynGO) genes</td></tr>
+<tr><td style="width:38%">Proteins studied</td><td>1,082 postsynaptic (SynGO) proteins; 1,070 with a usable tolerance score</td></tr>
 <tr><td style="width:38%">Training and validation variants</td><td>15,339 ClinVar variants (5,449 pathogenic, 9,890 benign) in 716 genes</td></tr>
 <tr><td style="width:38%">Features per variant</td><td>42</td></tr>
 <tr><td style="width:38%">Untouched test set</td><td>1,357 variants (602 pathogenic, 755 benign) in 85 genes</td></tr>
@@ -1036,7 +1040,7 @@ A head-to-head comparison with those scores hasn't been done yet.</div>
 <div class="qa"><b>How does it compare with AlphaMissense, REVEL or CADD?</b> Not compared yet. ESM-1v was the planned baseline because it
 is the evolution-only starting point the hypothesis is about. Several of those tools were trained or calibrated with clinical or
 population labels, so a fair comparison has to remove overlapping variants. It's a natural next step.</div>
-<div class="qa"><b>Why postsynaptic proteins?</b> They are highly conserved, densely annotated (SynGO, 1,080 genes) and central to
+<div class="qa"><b>Why postsynaptic proteins?</b> They are highly conserved, densely annotated (SynGO, 1,082 proteins) and central to
 neurodevelopmental disorders, with many variants still unclassified. The method itself isn't specific to them.</div>
 
 <h3>About the data</h3>
@@ -1190,7 +1194,7 @@ and binding regions (LIPs); UniProt adds known sites (ligand binding, transmembr
 <tr><td>Residue hiding</td><td>building a variant's human-variant features without any variant at its own residue</td></tr>
 <tr><td>RSA</td><td>relative solvent accessibility: the share of a residue's surface exposed to water</td></tr>
 <tr><td>Spearman correlation</td><td>agreement between two rankings: +1 same order, 0 unrelated, −1 reversed</td></tr>
-<tr><td>SynGO</td><td>an expert-curated database of synapse genes; the source of the 1,080 postsynaptic genes</td></tr>
+<tr><td>SynGO</td><td>an expert-curated database of synapse genes; the source of the 1,082 postsynaptic proteins</td></tr>
 <tr><td>Target</td><td>the answer a model learns to produce</td></tr>
 <tr><td>Validation / test set</td><td>genes held out from training: validation for choosing between models, test for one final check</td></tr>
 <tr><td>VUS</td><td>variant of uncertain significance: a ClinVar entry with no pathogenic or benign call</td></tr>
